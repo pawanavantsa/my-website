@@ -14,6 +14,7 @@ export const technologyLogos = [
   { name: "PostgreSQL", slug: "postgresql" },
   { name: "MongoDB", slug: "mongodb" },
   { name: "TensorFlow", slug: "tensorflow" },
+  { name: "PyTorch", slug: "pytorch" },
 ] as const;
 
 export function techLogoUrl(slug: string) {

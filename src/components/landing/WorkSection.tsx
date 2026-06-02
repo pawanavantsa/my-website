@@ -7,7 +7,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { unsplash } from "@/lib/media";
 import { ProductIcon } from "@/components/products/ProductIcon";
-import { featuredProductNames, getProductByName } from "@/lib/products";
+import { products } from "@/lib/products";
+
+const productsCard = {
+  title: "Products & solutions",
+  description:
+    "Xeroura ships a growing portfolio of production-ready AI platforms and copilots. From customer service and employee assist to document intelligence and workflow automation, each product is built to deploy quickly, integrate with your stack, and prove value in live environments.",
+  groups: [
+    ["Xeroura CS", "LiveBot", "Xeroura AI", "Xeroura Flow", "Xeroura DocAI"],
+    ["Xeroura Insight", "Xeroura Voice", "Xeroura Guard", "Xeroura Teams", "Xeroura Connect"],
+  ],
+};
 
 const services = [
   {
@@ -144,49 +154,43 @@ export function WorkSection() {
 
       <div className="stack-track">
         <article ref={firstCardRef} className={cardClassName} style={{ zIndex: 1 }}>
-          <div className="flex flex-[0.35] flex-col justify-between p-2 md:p-4">
-            <div>
-              <p className="text-lg text-black/80">Products &amp; solutions</p>
-              <h3
-                ref={numberRef}
-                className="mt-1 text-[clamp(4.5rem,14vw,9rem)] font-bold leading-none tracking-tight"
-                style={{ minWidth: "5ch" }}
-              >
-                0+
-              </h3>
-              <p className="mt-2 max-w-sm text-sm text-[#444444]">products and solutions ready</p>
-            </div>
+          <div className="flex flex-[0.35] flex-row items-start justify-between p-2 md:p-4">
+            <h3
+              ref={numberRef}
+              className="text-[clamp(3.25rem,11vw,7.5rem)] font-medium leading-none tracking-tight md:text-9xl"
+              style={{ minWidth: "5ch" }}
+            >
+              0+
+            </h3>
+            <h4 className="max-w-[10rem] text-xl leading-snug">{productsCard.title}</h4>
           </div>
-          <div className="flex flex-[0.65] flex-col justify-end gap-5 p-2 md:justify-center md:p-4">
-            <p className="max-w-lg text-xl leading-snug sm:text-2xl lg:text-3xl">
-              A portfolio of production-ready AI products and platforms — including{" "}
-              {featuredProductNames.slice(0, -1).join(", ")}, and {featuredProductNames.at(-1)}.
-            </p>
-            <ul className="flex max-w-lg flex-wrap gap-2">
-              {featuredProductNames.map((name) => {
-                const product = getProductByName(name);
-                return (
-                  <li
-                    key={name}
-                    className="flex items-center gap-1.5 rounded-full border border-black/10 bg-white py-1 pl-2 pr-3 text-xs font-medium text-black sm:text-sm"
-                  >
-                    {product ? (
-                      <ProductIcon slug={product.slug} className="h-4 w-4 shrink-0" />
-                    ) : null}
-                    {name}
-                  </li>
-                );
-              })}
-              <li className="flex items-center gap-1.5 rounded-full border border-dashed border-black/20 py-1 pl-2 pr-3 text-xs text-[#555] sm:text-sm">
-                <ProductIcon slug="more" className="h-4 w-4 shrink-0 opacity-60" />
-                +5 more
-              </li>
-            </ul>
+
+          <div className="mt-6 flex flex-[0.65] flex-col items-start gap-6 p-2 md:mt-0 md:gap-8 md:p-4">
+            <p className="max-w-xl text-2xl leading-snug sm:text-3xl">{productsCard.description}</p>
+
+            <div className="flex flex-wrap justify-start gap-10 md:gap-14">
+              {productsCard.groups.map((group, i) => (
+                <ul key={i} className="text-base font-medium text-black sm:text-lg">
+                  {group.map((item) => {
+                    const product = products.find((p) => p.name === item);
+                    return (
+                      <li key={item} className="flex items-center gap-3 py-1.5 sm:py-2">
+                        {product ? (
+                          <ProductIcon slug={product.slug} className="h-6 w-6 shrink-0 text-brand-primary sm:h-7 sm:w-7" />
+                        ) : null}
+                        {item}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ))}
+            </div>
+
             <Link
               href="/products"
               className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-brand-primary transition hover:text-brand-accent sm:text-base"
             >
-              View all products &amp; solutions
+              View all {products.length}+ products
               <span aria-hidden>→</span>
             </Link>
           </div>
