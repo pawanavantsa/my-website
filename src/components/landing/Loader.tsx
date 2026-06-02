@@ -6,12 +6,11 @@ import { gsap } from "gsap";
 const words = [
   "Welcome",
   "स्वागत है",
-  "స్వాగతం",
-  "Bienvenido",
   "Bienvenue",
   "Willkommen",
   "ようこそ",
-  "欢迎",
+  "Witamy",
+  "స్వాగతం",
 ];
 
 export function Loader() {

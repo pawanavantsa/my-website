@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { setLenis } from "@/lib/lenis-instance";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -47,6 +48,7 @@ export function GsapScrollProvider({ children }: { children: React.ReactNode }) 
       touchMultiplier: 1,
       gestureOrientation: "vertical",
     });
+    setLenis(lenis);
 
     const root = document.documentElement;
     root.classList.add("lenis", "lenis-smooth");
@@ -65,6 +67,7 @@ export function GsapScrollProvider({ children }: { children: React.ReactNode }) 
       window.removeEventListener("welcome-loader-done", onWelcomeDone);
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
       ScrollTrigger.clearScrollMemory();
+      setLenis(null);
       lenis.destroy();
       root.classList.remove("lenis", "lenis-smooth");
       document.body.classList.remove("home-scroll");

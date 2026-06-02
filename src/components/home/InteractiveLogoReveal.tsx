@@ -55,11 +55,11 @@ const SHARDS: Shard[] = [
 
 /** Small soft brush — white = visible in luminance masks (Safari/WebKit). */
 function buildBrushMask(x: number, y: number, radiusPx: number) {
-  return `radial-gradient(circle ${radiusPx}px at ${x}px ${y}px, #fff 0%, rgba(255,255,255,0.75) 42%, transparent 68%)`;
+  return `radial-gradient(circle ${radiusPx}px at ${x}px ${y}px, #fff 0%, rgba(255,255,255,0.8) 48%, transparent 78%)`;
 }
 
-const BRUSH_RADIUS = 120;
-const BRUSH_RADIUS_DRAG = 150;
+const BRUSH_RADIUS = 175;
+const BRUSH_RADIUS_DRAG = 215;
 
 export function InteractiveLogoReveal({ className = "", hideProgress = 0 }: InteractiveLogoRevealProps) {
   const reduced = useReducedMotion();

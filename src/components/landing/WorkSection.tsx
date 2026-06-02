@@ -14,7 +14,7 @@ const services = [
     id: 1,
     title: "AI & Product Development",
     description:
-      "Design and launch AI-powered SaaS platforms, copilots, and automation products that drive measurable outcomes.",
+      "Design and launch AI-powered SaaS platforms, copilots, and automation products that drive measurable outcomes. From discovery and architecture through production rollout, we help teams ship faster—with guardrails, observability, and clear ownership.",
     image: unsplash.aiNeural,
     groups: [
       ["AI copilots", "Workflow automation", "SaaS acceleration"],
@@ -25,7 +25,7 @@ const services = [
     id: 2,
     title: "Software & IT Services",
     description:
-      "Modernize enterprise systems with secure, scalable engineering across cloud, data, integration, and operations.",
+      "Modernize enterprise systems with secure, scalable engineering across cloud, data, integration, and operations. We refactor legacy stacks, harden integrations, and keep platforms reliable as usage, compliance, and release cadence intensify.",
     image: unsplash.cloudServer,
     groups: [
       ["Cloud-native", "API integration", "Reliability"],
@@ -36,7 +36,7 @@ const services = [
     id: 3,
     title: "Staff Augmentation",
     description:
-      "Embed vetted talent and delivery pods to close skill gaps, speed execution, and build long-term capability.",
+      "Embed vetted talent and delivery pods to close skill gaps, speed execution, and build long-term capability. Engineers, architects, and delivery leads plug into your rituals and tools—scaling capacity up or down without losing context or quality.",
     image: unsplash.heroCollaboration,
     groups: [] as string[][],
   },
@@ -44,6 +44,9 @@ const services = [
 
 const cardClassName =
   "sticky top-0 left-0 flex h-[100dvh] min-h-[100dvh] w-full flex-col justify-between overflow-hidden bg-[#EEEEEE] p-2 md:flex-row md:p-4";
+
+const lastServiceCardClassName =
+  "sticky top-0 left-0 flex h-[78dvh] min-h-[78dvh] w-full flex-col justify-between overflow-hidden bg-[#EEEEEE] p-2 md:flex-row md:p-4";
 
 function progressToCount(progress: number): number {
   if (progress >= 0.92) return 10;
@@ -139,7 +142,7 @@ export function WorkSection() {
         <span className="block">What we do</span>
       </h2>
 
-      <div className="stack-track pb-px">
+      <div className="stack-track">
         <article ref={firstCardRef} className={cardClassName} style={{ zIndex: 1 }}>
           <div className="flex flex-[0.35] flex-col justify-between p-2 md:p-4">
             <div>
@@ -189,38 +192,41 @@ export function WorkSection() {
           </div>
         </article>
 
-        {services.map((service, index) => (
-          <article
-            key={service.id}
-            className={cardClassName}
-            style={{ zIndex: 2 + index }}
-          >
-            <div className="flex flex-[0.35] flex-row items-start justify-between p-2">
-              <h3 className="text-7xl font-medium md:text-9xl">{service.id}</h3>
-              <h4 className="max-w-[10rem] text-xl">{service.title}</h4>
-            </div>
-
-            <div className="mt-6 flex flex-[0.65] flex-col items-start justify-between gap-6 md:mt-0 md:gap-4">
-              <p className="text-2xl sm:text-3xl">{service.description}</p>
-
-              <div className="relative h-[200px] w-full max-w-[340px] overflow-hidden rounded-xl">
-                <Image src={service.image} alt="" fill className="object-cover" sizes="340px" />
+        {services.map((service, index) => {
+          const isLast = index === services.length - 1;
+          return (
+            <article
+              key={service.id}
+              className={isLast ? lastServiceCardClassName : cardClassName}
+              style={{ zIndex: 2 + index }}
+            >
+              <div className="flex flex-[0.35] flex-row items-start justify-between p-2 md:p-4">
+                <h3 className="text-7xl font-medium md:text-9xl">{service.id}</h3>
+                <h4 className="max-w-[10rem] text-xl leading-snug">{service.title}</h4>
               </div>
 
-              {service.groups.length > 0 ? (
-                <div className="mt-2 flex flex-wrap justify-start gap-8 md:mt-3">
-                  {service.groups.map((group, i) => (
-                    <ul key={i} className="text-sm text-[#444444]">
-                      {group.map((item) => (
-                        <li key={item}>{item}</li>
-                      ))}
-                    </ul>
-                  ))}
+              <div className="mt-6 flex flex-[0.65] flex-col items-start gap-6 p-2 md:mt-0 md:gap-8 md:p-4">
+                <p className="max-w-xl text-2xl leading-snug sm:text-3xl">{service.description}</p>
+
+                <div className="relative h-[200px] w-full max-w-[340px] shrink-0 overflow-hidden rounded-xl">
+                  <Image src={service.image} alt="" fill className="object-cover" sizes="340px" />
                 </div>
-              ) : null}
-            </div>
-          </article>
-        ))}
+
+                {service.groups.length > 0 ? (
+                  <div className="flex flex-wrap justify-start gap-8">
+                    {service.groups.map((group, i) => (
+                      <ul key={i} className="text-sm text-[#444444]">
+                        {group.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </article>
+          );
+        })}
       </div>
     </div>
   );
