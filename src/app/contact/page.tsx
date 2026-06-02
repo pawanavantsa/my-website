@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/ContactForm";
+import { InnerPageShell } from "@/components/layout/InnerPageShell";
 import { Reveal } from "@/components/Reveal";
+import { ip } from "@/lib/inner-page";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -10,17 +12,13 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div>
-      <section className="border-b border-slate-100 bg-white py-14 dark:border-slate-800 dark:bg-slate-950 sm:py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <InnerPageShell>
+      <section className={ip.section}>
+        <div className={ip.container}>
           <Reveal>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-primary">
-              Contact
-            </p>
-            <h1 className="mt-3 font-display text-4xl font-bold tracking-tight text-brand-navy dark:text-slate-100 sm:text-5xl">
-              Let&apos;s build what&apos;s next
-            </h1>
-            <p className="mt-4 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
+            <p className={ip.eyebrow}>Contact</p>
+            <h1 className={ip.h1}>Let&apos;s build what&apos;s next</h1>
+            <p className={ip.lead}>
               Reach out for partnerships, services, product inquiries, or media. We respond to
               thoughtful messages quickly.
             </p>
@@ -28,43 +26,35 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="py-14 sm:py-20">
-        <div className="mx-auto grid max-w-6xl items-stretch gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-          <Reveal className="min-h-0 h-full">
+      <section className={`${ip.section} border-b-0`}>
+        <div className={`${ip.container} grid items-stretch gap-10 lg:grid-cols-2`}>
+          <Reveal className="flex min-h-0 h-full flex-col">
             <div className="flex h-full min-h-0 flex-col gap-8">
-              <div className="rounded-3xl border border-slate-100 bg-slate-50/80 p-6 shadow-card dark:border-slate-800 dark:bg-slate-900/50 sm:p-8">
-                <h2 className="font-display text-lg font-semibold text-brand-navy dark:text-slate-100">
-                  Email
-                </h2>
-                <a
-                  className="mt-2 inline-flex text-sm font-semibold text-brand-primary hover:text-brand-accent"
-                  href={`mailto:${site.email}`}
-                >
+              <div className={ip.card}>
+                <h2 className={ip.h3}>Email</h2>
+                <a className={`${ip.link} mt-2 inline-flex text-sm`} href={`mailto:${site.email}`}>
                   {site.email}
                 </a>
               </div>
-              <div className="rounded-3xl border border-slate-100 bg-slate-50/80 p-6 shadow-card dark:border-slate-800 dark:bg-slate-900/50 sm:p-8">
-                <h2 className="font-display text-lg font-semibold text-brand-navy dark:text-slate-100">
-                  Office address
-                </h2>
-                <address className="mt-3 not-italic text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              <div className={ip.card}>
+                <h2 className={ip.h3}>Office address</h2>
+                <address className={`${ip.body} mt-3 not-italic`}>
                   {site.address.lines.map((line) => (
                     <span key={line} className="block">
                       {line}
                     </span>
                   ))}
                 </address>
-                <p className="mt-4 text-xs text-slate-500 dark:text-slate-500">
-                  Coordinates: {site.address.lat}, {site.address.lng} (Awfis N Heights, HITEC
-                  City)
+                <p className={`${ip.muted} mt-4 text-xs`}>
+                  Coordinates: {site.address.lat}, {site.address.lng} (Awfis N Heights, HITEC City)
                 </p>
               </div>
-              <div className="group relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-slate-100 shadow-card ring-brand-primary/0 transition hover:ring-2 hover:ring-brand-accent/40 dark:border-slate-800">
+              <div className="group relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-white/10">
                 <iframe
                   title="Office location preview (Google Maps)"
                   src={site.address.googleMapsEmbedUrl}
                   width="100%"
-                  className="pointer-events-none min-h-[280px] w-full flex-1 border-0 bg-slate-100 dark:bg-slate-900"
+                  className="pointer-events-none min-h-[280px] w-full flex-1 border-0 bg-black"
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
                 />
@@ -72,7 +62,7 @@ export default function ContactPage() {
                   href={site.address.googleMapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-brand-navy/85 via-transparent to-transparent px-4 pb-4 pt-24 text-center text-sm font-semibold text-white outline-none ring-inset ring-brand-accent/0 transition hover:from-brand-navy/90 focus-visible:ring-2"
+                  className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black/90 via-transparent to-transparent px-4 pb-4 pt-24 text-center text-sm font-semibold text-white outline-none ring-inset ring-brand-accent/0 transition hover:from-black focus-visible:ring-2"
                   aria-label="Open office location in Google Maps"
                 >
                   <span className="drop-shadow-md">
@@ -86,10 +76,10 @@ export default function ContactPage() {
             </div>
           </Reveal>
           <Reveal delayMs={120} className="flex min-h-0 h-full flex-col">
-            <ContactForm />
+            <ContactForm theme="dark" />
           </Reveal>
         </div>
       </section>
-    </div>
+    </InnerPageShell>
   );
 }

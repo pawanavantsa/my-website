@@ -15,6 +15,7 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-dm-sans)", "system-ui", "sans-serif"],
         display: ["var(--font-outfit)", "system-ui", "sans-serif"],
+        landing: ["var(--font-hero-title)", "var(--font-outfit)", "system-ui", "sans-serif"],
       },
       boxShadow: {
         glow: "0 0 48px rgba(0, 212, 216, 0.28)",

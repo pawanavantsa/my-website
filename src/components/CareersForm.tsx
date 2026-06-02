@@ -25,7 +25,12 @@ const initial = {
   message: "",
 };
 
-export function CareersForm() {
+type CareersFormProps = {
+  theme?: "default" | "dark";
+};
+
+export function CareersForm({ theme = "default" }: CareersFormProps) {
+  const isDark = theme === "dark";
   const [values, setValues] = useState(initial);
   const [fileName, setFileName] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -90,17 +95,22 @@ export function CareersForm() {
     }
   }
 
-  const inputClass =
-    "mt-1 w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/25 dark:border-slate-600 dark:bg-slate-900/80 dark:text-slate-100 dark:placeholder:text-slate-500";
+  const inputClass = isDark
+    ? "mt-1 w-full rounded-xl border border-white/15 bg-black/40 px-3 py-2.5 text-sm text-white shadow-sm outline-none transition placeholder:text-slate-500 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/25"
+    : "mt-1 w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/25 dark:border-slate-600 dark:bg-slate-900/80 dark:text-slate-100 dark:placeholder:text-slate-500";
+
+  const formClass = isDark
+    ? "grid gap-5 rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8"
+    : "grid gap-5 rounded-3xl border border-slate-100 bg-white/90 p-6 shadow-card backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 sm:p-8";
+
+  const labelClass = isDark
+    ? "text-sm font-medium text-slate-300"
+    : "text-sm font-medium text-slate-700 dark:text-slate-300";
 
   return (
-    <form
-      noValidate
-      onSubmit={onSubmit}
-      className="grid gap-5 rounded-3xl border border-slate-100 bg-white/90 p-6 shadow-card backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 sm:p-8"
-    >
+    <form noValidate onSubmit={onSubmit} className={formClass}>
       <div className="grid gap-5 sm:grid-cols-2">
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className={labelClass}>
           Full name *
           <input
             className={inputClass}
@@ -110,7 +120,7 @@ export function CareersForm() {
             autoComplete="name"
           />
         </label>
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className={labelClass}>
           Email *
           <input
             type="email"
@@ -121,7 +131,7 @@ export function CareersForm() {
             autoComplete="email"
           />
         </label>
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className={labelClass}>
           Phone *
           <input
             className={inputClass}
@@ -131,7 +141,7 @@ export function CareersForm() {
             autoComplete="tel"
           />
         </label>
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className={labelClass}>
           Current employer / organization *
           <input
             className={inputClass}
@@ -140,7 +150,7 @@ export function CareersForm() {
             name="employer"
           />
         </label>
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className={labelClass}>
           Current job title *
           <input
             className={inputClass}
@@ -149,7 +159,7 @@ export function CareersForm() {
             name="jobTitle"
           />
         </label>
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className={labelClass}>
           Specialization / skill set *
           <input
             className={inputClass}
@@ -158,7 +168,7 @@ export function CareersForm() {
             name="specialization"
           />
         </label>
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className={labelClass}>
           Years of experience *
           <input
             className={inputClass}
@@ -168,7 +178,7 @@ export function CareersForm() {
             placeholder="e.g. 4"
           />
         </label>
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className={labelClass}>
           Preferred job role *
           <input
             className={inputClass}
@@ -177,7 +187,7 @@ export function CareersForm() {
             name="preferredRole"
           />
         </label>
-        <label className="text-sm font-medium text-slate-700 sm:col-span-2">
+        <label className={`${labelClass} sm:col-span-2`}>
           Upload resume (PDF / DOC) *
           <input
             type="file"
@@ -194,7 +204,7 @@ export function CareersForm() {
             <p className="mt-1 text-xs text-slate-500 dark:text-slate-500">Selected: {fileName}</p>
           ) : null}
         </label>
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className={labelClass}>
           LinkedIn profile URL *
           <input
             className={inputClass}
@@ -204,7 +214,7 @@ export function CareersForm() {
             placeholder="https://www.linkedin.com/in/yourprofile"
           />
         </label>
-        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className={labelClass}>
           Portfolio / GitHub (optional)
           <input
             className={inputClass}
@@ -214,7 +224,7 @@ export function CareersForm() {
             placeholder="https://"
           />
         </label>
-        <label className="text-sm font-medium text-slate-700 sm:col-span-2">
+        <label className={`${labelClass} sm:col-span-2`}>
           Message / additional notes
           <textarea
             rows={4}
@@ -241,13 +251,13 @@ export function CareersForm() {
       >
         {status === "loading" ? "Submitting…" : "Submit application"}
       </button>
-      <p className="text-xs text-slate-500 dark:text-slate-500">
+      <p className={`text-xs ${isDark ? "text-slate-500" : "text-slate-500 dark:text-slate-500"}`}>
         By submitting, you agree to our{" "}
-        <a className="font-semibold text-brand-primary hover:text-brand-accent" href="/privacy-policy">
+        <a className={`font-semibold ${isDark ? "text-brand-accent hover:text-white" : "text-brand-primary hover:text-brand-accent"}`} href="/privacy-policy">
           Privacy Policy
         </a>{" "}
         and{" "}
-        <a className="font-semibold text-brand-primary hover:text-brand-accent" href="/terms-and-conditions">
+        <a className={`font-semibold ${isDark ? "text-brand-accent hover:text-white" : "text-brand-primary hover:text-brand-accent"}`} href="/terms-and-conditions">
           Terms &amp; Conditions
         </a>
         .

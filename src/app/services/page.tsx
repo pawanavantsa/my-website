@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { ButtonLink } from "@/components/ButtonLink";
+import { InnerPageShell } from "@/components/layout/InnerPageShell";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/SectionHeading";
+import { ip } from "@/lib/inner-page";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -41,24 +43,15 @@ const practices = [
 
 export default function ServicesPage() {
   return (
-    <div>
-      <section className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-b from-slate-50 via-white to-slate-50/80 py-16 dark:border-slate-800 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900/80 sm:py-20">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.35] dark:opacity-25"
-          style={{
-            backgroundImage:
-              "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,212,216,0.12), transparent), radial-gradient(ellipse 60% 40% at 100% 0%, rgba(10,61,145,0.08), transparent)",
-          }}
-        />
-        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <InnerPageShell>
+      <section className={ip.section}>
+        <div className={ip.container}>
           <Reveal>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-primary">Services</p>
-            <h1 className="mt-3 max-w-3xl font-display text-4xl font-bold tracking-tight text-brand-navy dark:text-slate-100 sm:text-5xl">
-              Outcome-led partnerships—not generic staff aug
-            </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600 dark:text-slate-400">
-              {site.legalName} helps you ship and scale with clear ownership: how we engage, how we govern risk,
-              and how we transfer capability back to your team when you are ready.
+            <p className={ip.eyebrow}>Services</p>
+            <h1 className={ip.h1}>Outcome-led partnerships—not generic staff aug</h1>
+            <p className={ip.lead}>
+              {site.legalName} helps you ship and scale with clear ownership: how we engage, how we
+              govern risk, and how we transfer capability back to your team when you are ready.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <ButtonLink href="/contact">Start a conversation</ButtonLink>
@@ -70,10 +63,11 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <section className="border-b border-slate-100 bg-white py-16 dark:border-slate-800 dark:bg-slate-950 sm:py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <section className={ip.sectionAlt}>
+        <div className={ip.container}>
           <Reveal>
             <SectionHeading
+              theme="dark"
               eyebrow="Engagements"
               title="Ways we work with you"
               description="Pick the shape that matches your constraints—same standards across every model."
@@ -84,11 +78,11 @@ export default function ServicesPage() {
               <Reveal key={p.title} delayMs={i * 80}>
                 <article
                   id={i === engagementModels.length - 1 ? "workforce" : undefined}
-                  className="flex h-full flex-col rounded-2xl border border-slate-200/90 bg-slate-50/50 p-7 shadow-card transition hover:-translate-y-0.5 hover:border-brand-accent/30 hover:shadow-glow-sm dark:border-slate-800 dark:bg-slate-900/50"
+                  className={`${ip.card} h-full transition hover:border-brand-accent/30`}
                 >
                   <div className="mb-4 h-1 w-14 rounded-full bg-gradient-to-r from-brand-primary to-brand-accent" />
-                  <h2 className="font-display text-xl font-semibold text-brand-navy dark:text-slate-100">{p.title}</h2>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{p.body}</p>
+                  <h2 className={ip.h2}>{p.title}</h2>
+                  <p className={`${ip.body} mt-3`}>{p.body}</p>
                 </article>
               </Reveal>
             ))}
@@ -96,10 +90,11 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <section className="bg-gradient-subtle py-16 dark:bg-slate-950 sm:py-20">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <section className={`${ip.section} border-b-0`}>
+        <div className={ip.container}>
           <Reveal>
             <SectionHeading
+              theme="dark"
               eyebrow="How we run delivery"
               title="Engineering discipline you can audit"
               description="Under the hood, the same practices apply whether we are embedded, milestone-based, or helping you ramp internal capacity."
@@ -108,18 +103,18 @@ export default function ServicesPage() {
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {practices.map((row, i) => (
               <Reveal key={row.title} delayMs={i * 70}>
-                <div className="rounded-2xl border border-slate-200/80 bg-white/80 p-6 dark:border-slate-800 dark:bg-slate-900/60">
-                  <h3 className="font-display text-lg font-semibold text-brand-navy dark:text-slate-100">{row.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{row.detail}</p>
+                <div className={ip.card}>
+                  <h3 className={ip.h3}>{row.title}</h3>
+                  <p className={`${ip.body} mt-2`}>{row.detail}</p>
                 </div>
               </Reveal>
             ))}
           </div>
           <Reveal delayMs={200}>
-            <div className="mt-12 flex flex-col items-start justify-between gap-6 rounded-2xl border border-slate-200/90 bg-white/90 p-8 dark:border-slate-800 dark:bg-slate-900/70 sm:flex-row sm:items-center">
-              <p className="max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                Product innovation, client programs, and workforce capacity sit in one operating fabric—so velocity
-                does not trade off against continuity.
+            <div className={`${ip.cardLg} mt-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center`}>
+              <p className={`${ip.bodyLg} max-w-2xl`}>
+                Product innovation, client programs, and workforce capacity sit in one operating
+                fabric—so velocity does not trade off against continuity.
               </p>
               <ButtonLink href="/contact" variant="secondary">
                 Talk through your context
@@ -128,6 +123,6 @@ export default function ServicesPage() {
           </Reveal>
         </div>
       </section>
-    </div>
+    </InnerPageShell>
   );
 }

@@ -17,7 +17,7 @@ const variants: Record<Variant, string> = {
   primary:
     "bg-gradient-to-r from-brand-primary to-brand-accent text-white shadow-glow-sm hover:scale-[1.04] hover:shadow-glow hover:brightness-[1.03]",
   secondary:
-    "border border-brand-primary/25 bg-white/80 text-brand-primary backdrop-blur hover:border-brand-accent/60 hover:shadow-glow-sm dark:border-cyan-400/25 dark:bg-slate-900/70 dark:text-cyan-100 dark:hover:border-brand-accent/50",
+    "border border-white/20 bg-white/5 text-white backdrop-blur hover:border-brand-accent/50 hover:bg-white/10",
   ghost:
     "text-brand-primary hover:text-brand-accent dark:text-cyan-200 dark:hover:text-brand-accent",
 };

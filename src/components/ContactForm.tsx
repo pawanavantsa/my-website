@@ -4,7 +4,12 @@ import { useState } from "react";
 import { FormInlineError } from "@/components/FormInlineError";
 import { validateEmail, validateRequiredText } from "@/lib/formValidation";
 
-export function ContactForm() {
+type ContactFormProps = {
+  theme?: "default" | "dark";
+};
+
+export function ContactForm({ theme = "default" }: ContactFormProps) {
+  const isDark = theme === "dark";
   const [values, setValues] = useState({
     name: "",
     email: "",
@@ -60,19 +65,24 @@ export function ContactForm() {
     }
   }
 
-  const inputClass =
-    "mt-1 w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/25 dark:border-slate-600 dark:bg-slate-900/80 dark:text-slate-100 dark:placeholder:text-slate-500";
+  const inputClass = isDark
+    ? "mt-1 w-full rounded-xl border border-white/15 bg-black/40 px-3 py-2.5 text-sm text-white shadow-sm outline-none transition placeholder:text-slate-500 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/25"
+    : "mt-1 w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/25 dark:border-slate-600 dark:bg-slate-900/80 dark:text-slate-100 dark:placeholder:text-slate-500";
+
+  const formClass = isDark
+    ? "flex h-full min-h-0 flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 sm:p-8"
+    : "flex h-full min-h-0 flex-col gap-4 rounded-3xl border border-slate-100 bg-white/90 p-6 shadow-card backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 sm:p-8";
+
+  const labelClass = isDark
+    ? "text-sm font-medium text-slate-300"
+    : "text-sm font-medium text-slate-700 dark:text-slate-300";
 
   return (
-    <form
-      noValidate
-      onSubmit={onSubmit}
-      className="flex h-full min-h-0 flex-col gap-4 rounded-3xl border border-slate-100 bg-white/90 p-6 shadow-card backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 sm:p-8"
-    >
-      <h2 className="font-display text-lg font-semibold text-brand-navy dark:text-slate-100">
+    <form noValidate onSubmit={onSubmit} className={formClass}>
+      <h2 className={`font-display text-lg font-semibold ${isDark ? "text-white" : "text-brand-navy dark:text-slate-100"}`}>
         Send a message
       </h2>
-      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+      <label className={labelClass}>
         Name *
         <input
           className={inputClass}
@@ -81,7 +91,7 @@ export function ContactForm() {
           name="name"
         />
       </label>
-      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+      <label className={labelClass}>
         Work email *
         <input
           type="email"
@@ -91,7 +101,7 @@ export function ContactForm() {
           name="email"
         />
       </label>
-      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+      <label className={labelClass}>
         Company
         <input
           className={inputClass}
@@ -100,7 +110,7 @@ export function ContactForm() {
           name="company"
         />
       </label>
-      <label className="flex min-h-0 flex-1 flex-col text-sm font-medium text-slate-700 dark:text-slate-300">
+      <label className={`flex min-h-0 flex-1 flex-col ${labelClass}`}>
         How can we help? *
         <textarea
           rows={4}

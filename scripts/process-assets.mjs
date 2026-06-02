@@ -16,12 +16,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
 const srcLogo = join(root, "public", "logo.png");
 const outTransparent = join(root, "public", "logo-transparent.png");
+const srcInfinity = join(root, "public", "logo-infinity.png");
+const outInfinityTransparent = join(root, "public", "logo-infinity-transparent.png");
 const appDir = join(root, "src", "app");
 const outIcon = join(appDir, "icon.png");
 
 const WHITE = 248; // pixels >= this are treated as background
 
-async function knockOutWhite(inputPath, outputPath) {
+async function knockOutWhite(inputPath, outputPath, { trim = false } = {}) {
   const { data, info } = await sharp(inputPath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const { width, height, channels } = info;
   if (channels !== 4) {
@@ -35,9 +37,11 @@ async function knockOutWhite(inputPath, outputPath) {
       data[i + 3] = 0;
     }
   }
-  await sharp(data, { raw: { width, height, channels: 4 } })
-    .png({ compressionLevel: 9 })
-    .toFile(outputPath);
+  let pipeline = sharp(data, { raw: { width, height, channels: 4 } });
+  if (trim) {
+    pipeline = pipeline.trim({ threshold: 10 });
+  }
+  await pipeline.png({ compressionLevel: 9 }).toFile(outputPath);
 }
 
 async function main() {
@@ -58,6 +62,11 @@ async function main() {
     .png({ compressionLevel: 9 })
     .toFile(outIcon);
   console.log("[process-assets] Wrote", outIcon);
+
+  if (existsSync(srcInfinity)) {
+    await knockOutWhite(srcInfinity, outInfinityTransparent, { trim: true });
+    console.log("[process-assets] Wrote", outInfinityTransparent);
+  }
 }
 
 main().catch((err) => {

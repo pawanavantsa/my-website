@@ -5,8 +5,8 @@ type SectionHeadingProps = {
   title: string;
   description?: ReactNode;
   align?: "left" | "center";
-  /** Use on dark sections (e.g. navy background) */
-  theme?: "default" | "light";
+  /** `light` / `dark`: headings and copy for dark backgrounds */
+  theme?: "default" | "light" | "dark";
 };
 
 export function SectionHeading({
@@ -17,7 +17,7 @@ export function SectionHeading({
   theme = "default",
 }: SectionHeadingProps) {
   const alignClass = align === "center" ? "text-center mx-auto" : "";
-  const isLight = theme === "light";
+  const onDark = theme === "light" || theme === "dark";
 
   return (
     <div className={`max-w-3xl ${alignClass}`}>
@@ -28,18 +28,14 @@ export function SectionHeading({
       ) : null}
       <h2
         className={`font-display text-3xl font-bold tracking-tight sm:text-4xl ${
-          isLight ? "text-white" : "text-brand-navy dark:text-slate-100"
+          onDark ? "text-white" : "text-brand-navy dark:text-slate-100"
         }`}
       >
-        {isLight ? (
-          title
-        ) : (
-          <span className="text-gradient">{title}</span>
-        )}
+        {onDark ? title : <span className="text-gradient">{title}</span>}
       </h2>
       {description ? (
         <div
-          className={`mt-4 text-base leading-relaxed ${isLight ? "text-slate-300" : "text-slate-600 dark:text-slate-400"}`}
+          className={`mt-4 text-base leading-relaxed ${onDark ? "text-slate-300" : "text-slate-600 dark:text-slate-400"}`}
         >
           {description}
         </div>

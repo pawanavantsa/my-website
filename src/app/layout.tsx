@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { DM_Sans, Outfit } from "next/font/google";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
+import { DM_Sans, Outfit, Syne } from "next/font/google";
+import { SiteChrome } from "@/components/SiteChrome";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { site } from "@/lib/site";
 import "./globals.css";
@@ -15,6 +14,13 @@ const outfit = Outfit({
 const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-dm-sans",
+  display: "swap",
+});
+
+const syne = Syne({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-hero-title",
   display: "swap",
 });
 
@@ -43,14 +49,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${outfit.variable} ${dmSans.variable}`}
+      className={`dark ${outfit.variable} ${dmSans.variable} ${syne.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen overflow-x-hidden font-sans">
+      <body className="min-h-screen overflow-x-clip font-sans">
         <ThemeProvider>
-          <SiteHeader />
           <main className="relative z-10">{children}</main>
-          <SiteFooter />
+          <SiteChrome />
         </ThemeProvider>
       </body>
     </html>
