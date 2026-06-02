@@ -51,7 +51,7 @@ export function LandingFooter() {
   return (
     <footer
       ref={footerRef}
-      className="relative z-[999] mt-16 flex h-[90vh] flex-col bg-[#eeeeee] px-6 pb-10 pt-10 sm:h-[70vh] md:h-[100vh]"
+      className="relative z-[6] mt-16 flex h-[90vh] flex-col bg-[#eeeeee] px-6 pb-10 pt-10 sm:h-[70vh] md:h-[100vh]"
     >
       <div className="landing-footer-top mx-auto flex flex-col gap-10 text-sm text-[#666] md:mt-10 md:w-7/10 md:flex-row md:justify-between">
         <div>

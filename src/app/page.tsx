@@ -11,7 +11,7 @@ import { LandingFooter } from "@/components/landing/LandingFooter";
 export default function HomePage() {
   return (
     <GsapScrollProvider>
-      <main className="bg-[#eeeeee] text-black">
+      <main className="relative isolate min-h-screen bg-[#eeeeee] text-black">
         <Loader />
         <XerouraHero />
         <AboutSection />

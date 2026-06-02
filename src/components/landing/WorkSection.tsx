@@ -134,13 +134,13 @@ export function WorkSection() {
   }, []);
 
   return (
-    <div ref={containerRef} id="services" className="relative z-[400] px-4 pb-0 pt-2 lg:px-10">
+    <div ref={containerRef} id="services" className="relative px-4 pb-0 pt-2 lg:px-10">
       <h2 className="work-title mb-3 max-w-[950px] overflow-hidden text-2xl lg:text-3xl">
         <span className="block">What we do</span>
       </h2>
 
-      <div className="stack-track">
-        <article ref={firstCardRef} className={cardClassName} style={{ zIndex: 10 }}>
+      <div className="stack-track pb-px">
+        <article ref={firstCardRef} className={cardClassName} style={{ zIndex: 1 }}>
           <div className="flex flex-[0.35] flex-col justify-between p-2 md:p-4">
             <div>
               <p className="text-lg text-black/80">Products &amp; solutions</p>
@@ -190,7 +190,11 @@ export function WorkSection() {
         </article>
 
         {services.map((service, index) => (
-          <article key={service.id} className={cardClassName} style={{ zIndex: 20 + index }}>
+          <article
+            key={service.id}
+            className={cardClassName}
+            style={{ zIndex: 2 + index }}
+          >
             <div className="flex flex-[0.35] flex-row items-start justify-between p-2">
               <h3 className="text-7xl font-medium md:text-9xl">{service.id}</h3>
               <h4 className="max-w-[10rem] text-xl">{service.title}</h4>

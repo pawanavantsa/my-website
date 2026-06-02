@@ -22,6 +22,7 @@ html:not(.lenis) {
 html.lenis,
 html.lenis body {
   height: auto;
+  overscroll-behavior-y: none;
 }
 
 .lenis.lenis-smooth {
@@ -49,6 +50,13 @@ body {
     ),
     radial-gradient(ellipse 80% 50% at 0% 0%, rgba(10, 61, 145, 0.18), transparent 45%),
     radial-gradient(ellipse 60% 40% at 50% 100%, rgba(5, 28, 59, 0.5), transparent 55%);
+}
+
+/* Home landing: single light surface — avoids navy gradient bleeding below footer */
+html.home-scroll,
+html.home-scroll body {
+  background: #eeeeee !important;
+  background-image: none !important;
 }
 
 @layer utilities {

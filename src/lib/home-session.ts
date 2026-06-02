@@ -14,7 +14,7 @@ export function getSavedHomeScroll(): number {
 
 export function saveHomeScroll(y: number): void {
   try {
-    sessionStorage.setItem(HOME_SCROLL_KEY, String(Math.max(0, y)));
+    sessionStorage.setItem(HOME_SCROLL_KEY, String(clampHomeScroll(y)));
   } catch {
     /* private mode */
   }

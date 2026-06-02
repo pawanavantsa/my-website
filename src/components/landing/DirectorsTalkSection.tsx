@@ -57,7 +57,7 @@ export function DirectorsTalkSection() {
   }, []);
 
   return (
-    <section ref={containerRef} className="bg-[#eeeeee] px-4 py-14 lg:px-10 lg:py-16">
+    <section ref={containerRef} className="relative z-[5] bg-[#eeeeee] px-4 py-14 lg:px-10 lg:py-16">
       <div className="mx-auto max-w-6xl">
         <div className="directors-heading mb-10 flex flex-col gap-4 md:mb-12 md:flex-row md:items-end md:justify-between">
           <h2 className="text-3xl font-medium tracking-tight">Directors&apos; talk</h2>
