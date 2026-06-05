@@ -23,6 +23,10 @@ export const site = {
   },
 } as const;
 
+export function mailtoHref(email: string = site.email) {
+  return `mailto:${email}`;
+}
+
 export const navLinks = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },

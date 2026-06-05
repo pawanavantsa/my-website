@@ -5,7 +5,7 @@ import { InnerPageShell } from "@/components/layout/InnerPageShell";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/SectionHeading";
 import { ip } from "@/lib/inner-page";
-import { site } from "@/lib/site";
+import { mailtoHref, site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "About",
@@ -90,7 +90,7 @@ export default function AboutPage() {
             </div>
             <p className={`${ip.muted} mt-8 text-sm`}>
               Prefer email?{" "}
-              <Link className={ip.link} href={`mailto:${site.email}`}>
+              <Link className={ip.link} href={mailtoHref()}>
                 {site.email}
               </Link>
             </p>

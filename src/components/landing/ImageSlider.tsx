@@ -15,6 +15,7 @@ const images = [
 ] as const;
 
 const COPIES = 3;
+const AUTO_SCROLL_MS = 3000;
 
 function getOneSetWidth(container: HTMLDivElement) {
   const slides = container.querySelectorAll<HTMLElement>("[data-slide]");
@@ -46,18 +47,18 @@ function getNearestSlide(container: HTMLDivElement) {
   return { nearest, slides };
 }
 
-const AUTO_SCROLL_MS = 3000;
-
 export function ImageSlider() {
   const rootRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+  const isTouching = useRef(false);
   const autoScrollPaused = useRef(false);
   const isHoverRef = useRef(false);
   const isInView = useRef(true);
   const startX = useRef(0);
   const scrollLeftStart = useRef(0);
   const rafRef = useRef<number | null>(null);
+  const scrollEndTimer = useRef<number | null>(null);
   const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
   const [isHover, setIsHover] = useState(false);
   const [isPressed, setIsPressed] = useState(false);
@@ -89,6 +90,11 @@ export function ImageSlider() {
       inner.style.opacity = String(opacity);
       inner.style.zIndex = String(Math.round((1 - t) * 20));
     });
+  }, []);
+
+  const fixInfiniteLoop = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container || isDragging.current || isTouching.current) return;
 
     const oneSet = getOneSetWidth(container);
     if (oneSet <= 0) return;
@@ -120,9 +126,27 @@ export function ImageSlider() {
     }
   }, []);
 
+  const onScrollSettled = useCallback(() => {
+    fixInfiniteLoop();
+    updateVisuals();
+    if (!isDragging.current && !isTouching.current) {
+      snapToNearest();
+    }
+  }, [fixInfiniteLoop, snapToNearest, updateVisuals]);
+
+  const scheduleScrollSettled = useCallback(() => {
+    scheduleVisuals();
+    if (scrollEndTimer.current !== null) {
+      window.clearTimeout(scrollEndTimer.current);
+    }
+    scrollEndTimer.current = window.setTimeout(onScrollSettled, 120);
+  }, [onScrollSettled, scheduleVisuals]);
+
   const advanceToNext = useCallback(() => {
     const container = scrollRef.current;
-    if (!container || isDragging.current || autoScrollPaused.current || !isInView.current) return;
+    if (!container || isDragging.current || isTouching.current || autoScrollPaused.current || !isInView.current) {
+      return;
+    }
 
     const { nearest, slides } = getNearestSlide(container);
     if (!nearest) return;
@@ -135,30 +159,13 @@ export function ImageSlider() {
     centerScrollOnSlide(container, nextSlide, smooth);
   }, []);
 
-  const onPointerDown = (clientX: number) => {
-    const container = scrollRef.current;
-    if (!container) return;
-    isDragging.current = true;
-    autoScrollPaused.current = true;
-    setIsPressed(true);
-    startX.current = clientX;
-    scrollLeftStart.current = container.scrollLeft;
-  };
-
-  const onPointerMove = (clientX: number) => {
-    const container = scrollRef.current;
-    if (!isDragging.current || !container) return;
-    container.scrollLeft = scrollLeftStart.current - (clientX - startX.current) * 1.35;
-    scheduleVisuals();
-  };
-
   const stopDragging = useCallback(() => {
     if (!isDragging.current) return;
     isDragging.current = false;
     setIsPressed(false);
-    snapToNearest();
+    scheduleScrollSettled();
     if (!isHoverRef.current) autoScrollPaused.current = false;
-  }, [snapToNearest]);
+  }, [scheduleScrollSettled]);
 
   useEffect(() => {
     const container = scrollRef.current;
@@ -172,32 +179,39 @@ export function ImageSlider() {
     };
 
     requestAnimationFrame(init);
-    container.addEventListener("scroll", scheduleVisuals, { passive: true });
+
+    const onScroll = () => scheduleScrollSettled();
+    const onScrollEnd = () => onScrollSettled();
+
+    container.addEventListener("scroll", onScroll, { passive: true });
+    container.addEventListener("scrollend", onScrollEnd);
     window.addEventListener("resize", scheduleVisuals);
 
     return () => {
-      container.removeEventListener("scroll", scheduleVisuals);
+      container.removeEventListener("scroll", onScroll);
+      container.removeEventListener("scrollend", onScrollEnd);
       window.removeEventListener("resize", scheduleVisuals);
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      if (scrollEndTimer.current !== null) window.clearTimeout(scrollEndTimer.current);
     };
-  }, [scheduleVisuals, updateVisuals]);
+  }, [onScrollSettled, scheduleScrollSettled, scheduleVisuals, updateVisuals]);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
       setCursorPos({ x: e.clientX, y: e.clientY });
-      onPointerMove(e.clientX);
+      if (!isDragging.current || !scrollRef.current) return;
+      scrollRef.current.scrollLeft = scrollLeftStart.current - (e.clientX - startX.current) * 1.35;
+      scheduleVisuals();
     };
 
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", stopDragging);
-    window.addEventListener("touchend", stopDragging);
 
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", stopDragging);
-      window.removeEventListener("touchend", stopDragging);
     };
-  }, [stopDragging]);
+  }, [scheduleVisuals, stopDragging]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -245,14 +259,34 @@ export function ImageSlider() {
           setIsPressed(false);
           if (!isDragging.current) autoScrollPaused.current = false;
         }}
-        onMouseDown={(e) => onPointerDown(e.pageX)}
-        onTouchStart={(e) => onPointerDown(e.touches[0].pageX)}
-        onTouchMove={(e) => {
-          if (!isDragging.current) return;
-          e.preventDefault();
-          onPointerMove(e.touches[0].pageX);
+        onMouseDown={(e) => {
+          if (e.button !== 0) return;
+          const container = scrollRef.current;
+          if (!container) return;
+          isDragging.current = true;
+          autoScrollPaused.current = true;
+          setIsPressed(true);
+          startX.current = e.pageX;
+          scrollLeftStart.current = container.scrollLeft;
         }}
-        className="hide-scrollbar flex h-[280px] cursor-grab items-center gap-4 overflow-x-auto px-[calc(50%-min(42vw,150px))] active:cursor-grabbing select-none touch-pan-y sm:h-[340px] md:h-[400px] md:gap-5 md:px-[calc(50%-150px)]"
+        onTouchStart={() => {
+          isTouching.current = true;
+          autoScrollPaused.current = true;
+        }}
+        onTouchEnd={() => {
+          isTouching.current = false;
+          scheduleScrollSettled();
+          window.setTimeout(() => {
+            if (!isTouching.current && !isDragging.current) {
+              autoScrollPaused.current = false;
+            }
+          }, AUTO_SCROLL_MS);
+        }}
+        onTouchCancel={() => {
+          isTouching.current = false;
+          scheduleScrollSettled();
+        }}
+        className="hide-scrollbar flex h-[280px] cursor-grab items-center gap-4 overflow-x-auto overscroll-x-contain px-[calc(50%-min(42vw,150px))] active:cursor-grabbing select-none [touch-action:pan-x] [-webkit-overflow-scrolling:touch] sm:h-[340px] md:h-[400px] md:gap-5 md:px-[calc(50%-150px)]"
       >
         {extendedImages.map((item, index) => (
           <div

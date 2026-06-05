@@ -10,6 +10,9 @@ import { getLenis } from "@/lib/lenis-instance";
 import { navLinks, site } from "@/lib/site";
 
 const SHEET_MAX_H = 480;
+const SHEET_RADIUS = 24;
+const PILL_RADIUS = 9999;
+const SHEET_TRANSITION = { duration: 0.55, ease: [0.32, 0.72, 0, 1] as const };
 
 function isNavActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
@@ -19,6 +22,7 @@ function isNavActive(pathname: string, href: string) {
 export function BottomNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [collapsedPill, setCollapsedPill] = useState(true);
   const [mouseHover, setMouseHover] = useState(false);
   const [visible, setVisible] = useState(pathname !== "/");
   const activeUser = useUserActivity();
@@ -26,7 +30,14 @@ export function BottomNav() {
   const menuListRef = useRef<HTMLUListElement>(null);
 
   const close = useCallback(() => setOpen(false), []);
-  const openMenu = useCallback(() => setOpen(true), []);
+  const openMenu = useCallback(() => {
+    setCollapsedPill(false);
+    setOpen(true);
+  }, []);
+
+  const onSheetAnimationComplete = useCallback(() => {
+    if (!open) setCollapsedPill(true);
+  }, [open]);
 
   useEffect(() => {
     if (pathname !== "/") {
@@ -36,6 +47,7 @@ export function BottomNav() {
 
     setVisible(false);
     setOpen(false);
+    setCollapsedPill(true);
 
     const onWelcomeDone = () => setVisible(true);
     window.addEventListener("welcome-loader-done", onWelcomeDone);
@@ -111,9 +123,16 @@ export function BottomNav() {
 
       <div className="pointer-events-none fixed inset-x-0 bottom-3 z-[990] flex justify-center px-3">
         <motion.div
-          animate={{ height: open ? SHEET_MAX_H : 48 }}
-          transition={{ duration: 0.55, ease: [0.32, 0.72, 0, 1] }}
-          className="pointer-events-auto flex w-full max-w-[min(100%,36rem)] flex-col overflow-hidden rounded-2xl bg-black text-white shadow-[0_8px_40px_rgba(0,0,0,0.45)]"
+          animate={{
+            height: open ? SHEET_MAX_H : 48,
+            borderRadius: collapsedPill ? PILL_RADIUS : SHEET_RADIUS,
+          }}
+          transition={{
+            height: SHEET_TRANSITION,
+            borderRadius: { duration: 0 },
+          }}
+          onAnimationComplete={onSheetAnimationComplete}
+          className="pointer-events-auto flex w-full max-w-[min(100%,36rem)] flex-col overflow-hidden bg-black text-white shadow-[0_8px_40px_rgba(0,0,0,0.45)]"
           onMouseEnter={() => setMouseHover(true)}
           onMouseLeave={() => setMouseHover(false)}
         >

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { InnerPageShell } from "@/components/layout/InnerPageShell";
 import { ip } from "@/lib/inner-page";
-import { site } from "@/lib/site";
+import { mailtoHref, site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -124,7 +124,7 @@ export default function PrivacyPolicyPage() {
             <h2 className={legalH2}>8. Contact us</h2>
             <p className="mt-3">
               For privacy-related questions, contact us at:{" "}
-              <Link className={ip.link} href={`mailto:${site.email}`}>
+              <Link className={ip.link} href={mailtoHref()}>
                 {site.email}
               </Link>
             </p>

@@ -3,7 +3,7 @@ import { ContactForm } from "@/components/ContactForm";
 import { InnerPageShell } from "@/components/layout/InnerPageShell";
 import { Reveal } from "@/components/Reveal";
 import { ip } from "@/lib/inner-page";
-import { site } from "@/lib/site";
+import { mailtoHref, site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -32,7 +32,7 @@ export default function ContactPage() {
             <div className="flex h-full min-h-0 flex-col gap-8">
               <div className={ip.card}>
                 <h2 className={ip.h3}>Email</h2>
-                <a className={`${ip.link} mt-2 inline-flex text-sm`} href={`mailto:${site.email}`}>
+                <a className={`${ip.link} mt-2 inline-flex text-sm`} href={mailtoHref()}>
                   {site.email}
                 </a>
               </div>
