@@ -1,7 +1,7 @@
 /** Pre-mixed flip sequence for the hero name reveal (see scripts/build-name-reveal-audio.mjs). */
 export const NAME_REVEAL_SRC = "/sounds/name-reveal-flips.mp3";
 
-const REVEAL_VOLUME = 1;
+const REVEAL_VOLUME = 0.5;
 const HERO_AUDIO_VISIBLE_RATIO = 0.45;
 
 let primed = false;
