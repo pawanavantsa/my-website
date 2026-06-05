@@ -14,6 +14,7 @@ const SHEET_MAX_H = 480;
 const SHEET_RADIUS = 24;
 const PILL_RADIUS = 9999;
 const SHEET_TRANSITION = { duration: 0.55, ease: [0.32, 0.72, 0, 1] as const };
+const PILL_IDLE_HIDE_MS = 2000;
 
 function isNavActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
@@ -26,9 +27,29 @@ export function BottomNav() {
   const [collapsedPill, setCollapsedPill] = useState(true);
   const [mouseHover, setMouseHover] = useState(false);
   const [visible, setVisible] = useState(pathname !== "/");
+  const [pillAwake, setPillAwake] = useState(true);
   const activeUser = useUserActivity();
   const scrollYRef = useRef(0);
   const menuListRef = useRef<HTMLUListElement>(null);
+  const hideTimerRef = useRef<number | null>(null);
+
+  const wakePill = useCallback(() => {
+    setPillAwake(true);
+    if (hideTimerRef.current !== null) {
+      window.clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  }, []);
+
+  const schedulePillHide = useCallback(() => {
+    if (hideTimerRef.current !== null) {
+      window.clearTimeout(hideTimerRef.current);
+    }
+    hideTimerRef.current = window.setTimeout(() => {
+      setPillAwake(false);
+      hideTimerRef.current = null;
+    }, PILL_IDLE_HIDE_MS);
+  }, []);
 
   const close = useCallback(() => setOpen(false), []);
   const openMenu = useCallback(() => {
@@ -58,6 +79,46 @@ export function BottomNav() {
 
     return unsubscribe;
   }, [pathname]);
+
+  useEffect(() => {
+    if (!visible || open) {
+      wakePill();
+      return;
+    }
+
+    const onActivity = () => {
+      wakePill();
+      schedulePillHide();
+    };
+
+    onActivity();
+
+    window.addEventListener("mousemove", onActivity, { passive: true });
+    window.addEventListener("touchstart", onActivity, { passive: true });
+    window.addEventListener("wheel", onActivity, { passive: true });
+    window.addEventListener("scroll", onActivity, { passive: true });
+    window.addEventListener("keydown", onActivity);
+
+    const lenis = getLenis();
+    lenis?.on("scroll", onActivity);
+
+    return () => {
+      if (hideTimerRef.current !== null) {
+        window.clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = null;
+      }
+      window.removeEventListener("mousemove", onActivity);
+      window.removeEventListener("touchstart", onActivity);
+      window.removeEventListener("wheel", onActivity);
+      window.removeEventListener("scroll", onActivity);
+      window.removeEventListener("keydown", onActivity);
+      lenis?.off("scroll", onActivity);
+    };
+  }, [visible, open, wakePill, schedulePillHide]);
+
+  useEffect(() => {
+    if (visible) setPillAwake(true);
+  }, [visible]);
 
   useEffect(() => {
     if (!open) return;
@@ -121,7 +182,14 @@ export function BottomNav() {
         ) : null}
       </AnimatePresence>
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-3 z-[990] flex justify-center px-3">
+      <motion.div
+        animate={{
+          y: pillAwake || open ? 0 : 80,
+          opacity: pillAwake || open ? 1 : 0,
+        }}
+        transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+        className="pointer-events-none fixed inset-x-0 bottom-3 z-[990] flex justify-center px-3"
+      >
         <motion.div
           animate={{
             height: open ? SHEET_MAX_H : 48,
@@ -132,11 +200,25 @@ export function BottomNav() {
             borderRadius: { duration: 0 },
           }}
           onAnimationComplete={onSheetAnimationComplete}
-          className="pointer-events-auto flex w-full max-w-[min(100%,36rem)] flex-col overflow-hidden bg-black text-white shadow-[0_8px_40px_rgba(0,0,0,0.45)]"
-          onMouseEnter={() => setMouseHover(true)}
+          className={`relative flex w-full max-w-[min(100%,36rem)] flex-col overflow-hidden bg-black text-white shadow-[0_8px_40px_rgba(0,0,0,0.45)] ${
+            pillAwake || open ? "pointer-events-auto" : "pointer-events-none"
+          }`}
+          onMouseEnter={() => {
+            setMouseHover(true);
+            wakePill();
+            if (!open) schedulePillHide();
+          }}
           onMouseLeave={() => setMouseHover(false)}
         >
-          <div className="flex h-12 shrink-0 items-center justify-between px-3">
+          <div
+            aria-hidden
+            className="menu-pill-glow pointer-events-none absolute inset-0 z-0"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_20%_50%,rgba(0,212,216,0.09),transparent_62%)]"
+          />
+          <div className="relative z-[1] flex h-12 shrink-0 items-center justify-between px-3">
             {!open ? (
               <button
                 type="button"
@@ -241,7 +323,7 @@ export function BottomNav() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="flex min-h-0 flex-1 flex-col px-6 pb-6 pt-1"
+                className="relative z-[1] flex min-h-0 flex-1 flex-col px-6 pb-6 pt-1"
                 style={{ maxHeight: SHEET_MAX_H - 48 }}
               >
                 <div className="flex shrink-0 items-center justify-between border-b border-stone-800 pb-4">
@@ -323,7 +405,7 @@ export function BottomNav() {
             ) : null}
           </AnimatePresence>
         </motion.div>
-      </div>
+      </motion.div>
     </>
   );
 }
