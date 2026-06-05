@@ -1,19 +1,20 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useUserActivity from "@/hooks/useUserActivity";
-import { NavIcon } from "@/components/icons/NavIcon";
-import { logoSrc } from "@/lib/media";
+import { MenuBrandLogo, NavIcon } from "@/components/icons/NavIcon";
 import { getLenis } from "@/lib/lenis-instance";
 import { navLinks, site } from "@/lib/site";
 
-const menuItems = navLinks.filter((l) => l.href !== "/");
-
 const SHEET_MAX_H = 480;
+
+function isNavActive(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -144,9 +145,9 @@ export function BottomNav() {
                   <motion.div
                     animate={!mouseHover && activeUser ? { y: 0 } : { y: "130%" }}
                     transition={{ duration: 0.45, ease: "easeInOut", delay: 0.1 }}
-                    className="relative h-5 w-5"
+                    className="relative flex h-5 w-5 items-center justify-center"
                   >
-                    <Image src={logoSrc} alt="" fill className="object-contain" sizes="20px" />
+                    <MenuBrandLogo className="h-5 w-5" />
                   </motion.div>
                 </div>
 
@@ -241,42 +242,63 @@ export function BottomNav() {
                   onWheel={onMenuWheel}
                   onTouchMove={(e) => e.stopPropagation()}
                 >
-                  <li className="group flex h-16 w-full items-center gap-4 border-b border-stone-800 p-3">
-                    <Link
-                      href="/"
-                      className="flex w-full min-h-[3rem] cursor-pointer items-center gap-4"
-                      onClick={close}
-                    >
-                      <div className="pointer-events-none relative h-12 w-12 overflow-hidden rounded-lg bg-white/5">
-                        <Image src={logoSrc} alt="" fill className="object-contain p-1" sizes="48px" />
-                      </div>
-                      <span className="pointer-events-none flex-1 text-xl transition-transform duration-300 group-hover:translate-x-3">
-                        Home
-                      </span>
-                    </Link>
-                  </li>
-                  {menuItems.map((item) => (
-                    <li
-                      key={item.href}
-                      className="group flex h-20 w-full items-center gap-4 border-b border-stone-800 p-4"
-                    >
-                      <Link
-                        href={item.href}
-                        className="flex w-full min-h-[3rem] cursor-pointer items-center gap-4"
-                        onClick={close}
+                  {navLinks.map((item) => {
+                    const active = isNavActive(pathname, item.href);
+
+                    return (
+                      <li
+                        key={item.href}
+                        className={`group relative flex w-full items-center gap-4 border-b border-stone-800 p-4 ${
+                          active ? "min-h-[5.5rem]" : "h-20"
+                        }`}
                       >
-                        <div className="pointer-events-none flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-colors duration-300 group-hover:border-brand-accent/40 group-hover:bg-white/10">
-                          <NavIcon
-                            href={item.href}
-                            className="h-7 w-7 text-slate-300 transition-colors duration-300 group-hover:text-brand-accent"
-                          />
-                        </div>
-                        <span className="pointer-events-none flex-1 text-2xl transition-transform duration-300 group-hover:translate-x-4">
-                          {item.label}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
+                        {active ? (
+                          <>
+                            <div
+                              aria-hidden
+                              className="menu-active-glow pointer-events-none absolute inset-0"
+                            />
+                            <div
+                              aria-hidden
+                              className="pointer-events-none absolute inset-y-2 left-3 right-3 rounded-xl bg-[radial-gradient(ellipse_at_30%_50%,rgba(0,212,216,0.11),transparent_68%)]"
+                            />
+                          </>
+                        ) : null}
+                        <Link
+                          href={item.href}
+                          aria-current={active ? "page" : undefined}
+                          className="relative z-[1] flex w-full min-h-[3rem] cursor-pointer items-center gap-4"
+                          onClick={close}
+                        >
+                          <div
+                            className={`pointer-events-none flex shrink-0 items-center justify-center rounded-lg border transition-all duration-300 ${
+                              active
+                                ? "h-16 w-16 border-brand-accent/30 bg-brand-accent/[0.09]"
+                                : "h-14 w-14 border-white/10 bg-white/5 group-hover:border-brand-accent/40 group-hover:bg-white/10"
+                            }`}
+                          >
+                            <NavIcon
+                              href={item.href}
+                              className={`transition-all duration-300 ${
+                                active
+                                  ? "h-8 w-8 text-brand-accent/90"
+                                  : "h-7 w-7 text-slate-300 group-hover:text-brand-accent"
+                              }`}
+                            />
+                          </div>
+                          <span
+                            className={`pointer-events-none flex-1 transition-all duration-300 ${
+                              active
+                                ? "text-[1.75rem] font-medium text-white"
+                                : "text-2xl group-hover:translate-x-4"
+                            }`}
+                          >
+                            {item.label}
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </motion.div>
             ) : null}

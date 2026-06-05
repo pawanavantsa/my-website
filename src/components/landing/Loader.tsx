@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { installScrambleAudioUnlock, primeScrambleAudio } from "@/lib/scramble-flip-audio";
 
 const words = [
   "Welcome",
@@ -18,6 +19,11 @@ export function Loader() {
   const [fade, setFade] = useState(true);
   const [done, setDone] = useState(false);
   const loaderRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const cleanup = installScrambleAudioUnlock();
+    return cleanup;
+  }, []);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -47,6 +53,7 @@ export function Loader() {
         duration: 1,
         ease: "power3.inOut",
         onComplete: () => {
+          void primeScrambleAudio();
           window.dispatchEvent(new CustomEvent("welcome-loader-done"));
           setDone(true);
         },

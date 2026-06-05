@@ -1,25 +1,20 @@
-"use client";
+import type { Metadata } from "next";
+import { HomeLanding } from "@/components/landing/HomeLanding";
+import { site } from "@/lib/site";
 
-import { GsapScrollProvider } from "@/components/landing/GsapScrollProvider";
-import { Loader } from "@/components/landing/Loader";
-import { XerouraHero } from "@/components/landing/XerouraHero";
-import { AboutSection } from "@/components/landing/AboutSection";
-import { AchievementsSection } from "@/components/landing/AchievementsSection";
-import { WorkSection } from "@/components/landing/WorkSection";
-import { DirectorsTalkSection } from "@/components/landing/DirectorsTalkSection";
-import { LandingFooter } from "@/components/landing/LandingFooter";
+export const metadata: Metadata = {
+  title: site.name,
+  description: site.description,
+  openGraph: {
+    title: `${site.name} | ${site.tagline}`,
+    description: site.description,
+    type: "website",
+  },
+  alternates: {
+    canonical: "/",
+  },
+};
+
 export default function HomePage() {
-  return (
-    <GsapScrollProvider>
-      <main className="relative isolate min-h-screen bg-[#eeeeee] text-black">
-        <Loader />
-        <XerouraHero />
-        <AboutSection />
-        <AchievementsSection />
-        <WorkSection />
-        <DirectorsTalkSection />
-        <LandingFooter />
-      </main>
-    </GsapScrollProvider>
-  );
+  return <HomeLanding />;
 }

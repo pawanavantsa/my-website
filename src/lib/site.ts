@@ -2,6 +2,8 @@ export const site = {
   name: "Xeroura Technologies",
   legalName: "Xeroura Technologies Private Limited",
   tagline: "Humanising Intelligence, Powered by AI",
+  description:
+    "Xeroura Technologies builds production-ready AI products and enterprise platforms — copilots, workflow automation, and dedicated delivery pods from Hyderabad, India.",
   email: "Connect@Xeroura.com",
   address: {
     lines: [

@@ -29,15 +29,19 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 export const metadata: Metadata = {
   ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
   title: {
-    default: `${site.name} | AI-first products & enterprise IT`,
+    default: `${site.name} | ${site.tagline}`,
     template: `%s | ${site.name}`,
   },
-  description:
-    "Xeroura Technologies delivers AI-driven products, enterprise-grade software, and workforce services. Engineering intelligent digital futures from Hyderabad, India.",
+  description: site.description,
   openGraph: {
-    title: site.name,
-    description: site.tagline,
+    title: `${site.name} | ${site.tagline}`,
+    description: site.description,
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${site.name} | ${site.tagline}`,
+    description: site.description,
   },
 };
 
@@ -52,6 +56,9 @@ export default function RootLayout({
       className={`dark ${outfit.variable} ${dmSans.variable} ${syne.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <link rel="preload" href="/sounds/card-snap.mp3" as="fetch" crossOrigin="anonymous" />
+      </head>
       <body className="min-h-screen overflow-x-clip font-sans">
         <ThemeProvider>
           <main className="relative z-10">{children}</main>

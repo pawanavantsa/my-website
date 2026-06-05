@@ -151,6 +151,44 @@ html.home-scroll body {
   @apply outline-2 outline-offset-2 outline-brand-accent;
 }
 
+@keyframes tech-marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.tech-marquee-track {
+  animation: tech-marquee-scroll 75s linear infinite;
+}
+
+@keyframes menu-active-glow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.menu-active-glow {
+  background-image: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(0, 212, 216, 0.06) 22%,
+    rgba(45, 212, 191, 0.14) 50%,
+    rgba(0, 212, 216, 0.06) 78%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  animation: menu-active-glow 6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

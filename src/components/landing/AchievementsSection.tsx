@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { technologyLogos, techLogoUrl } from "@/lib/tech-logos";
+import { TechLogoMarquee } from "@/components/landing/TechLogoMarquee";
 
 const capabilities = [
   "AI copilots",
@@ -29,37 +29,37 @@ export function AchievementsSection() {
     const ctx = gsap.context(() => {
       gsap.from(".achievements-heading", {
         opacity: 0,
-        y: 24,
-        duration: 0.6,
+        y: 28,
+        duration: 0.65,
         ease: "power3.out",
         scrollTrigger: {
           trigger: containerRef.current,
-          start: "top 80%",
+          start: "top 72%",
           toggleActions: "play none none none",
         },
       });
 
       gsap.from(".achievements-copy", {
         opacity: 0,
-        y: 20,
-        duration: 0.55,
+        y: 36,
+        duration: 0.75,
         ease: "power3.out",
         scrollTrigger: {
           trigger: containerRef.current,
-          start: "top 75%",
+          start: "top 68%",
           toggleActions: "play none none none",
         },
       });
 
       gsap.from(".cap-pill", {
         opacity: 0,
-        y: 12,
-        duration: 0.45,
-        stagger: 0.05,
+        y: 16,
+        duration: 0.5,
+        stagger: 0.08,
         ease: "power2.out",
         scrollTrigger: {
           trigger: ".capabilities-pills",
-          start: "top 88%",
+          start: "top 85%",
           toggleActions: "play none none none",
         },
       });
@@ -69,52 +69,43 @@ export function AchievementsSection() {
   }, []);
 
   return (
-    <section ref={containerRef} className="p-4 pb-8 lg:p-10 lg:pb-10">
-      <div className="flex flex-col gap-8 md:flex-row md:justify-between md:gap-10">
-        <div className="md:flex-1">
-          <h2 className="achievements-heading text-3xl">Capabilities</h2>
+    <section ref={containerRef} className="py-16 lg:py-24">
+      <div className="mx-auto max-w-6xl px-4 lg:px-10">
+        <div className="grid items-start gap-8 lg:grid-cols-12 lg:gap-12">
+          <div className="lg:col-span-4">
+            <p className="achievements-heading text-sm font-semibold uppercase tracking-[0.22em] text-[#666]">
+              Expertise
+            </p>
+            <h2 className="achievements-heading mt-3 text-3xl font-medium tracking-tight text-black lg:text-4xl">
+              Capabilities
+            </h2>
+          </div>
+
+          <div className="lg:col-span-8">
+            <p className="achievements-copy text-2xl font-normal leading-[1.35] tracking-tight text-black sm:text-3xl lg:text-[2rem] lg:leading-[1.3]">
+              {paragraph}
+            </p>
+          </div>
         </div>
 
-        <div className="md:flex-1">
-          <p className="achievements-copy text-sm leading-relaxed text-[#444444] md:text-base">
-            {paragraph}
-          </p>
-
-          <ul className="capabilities-pills mt-6 flex flex-wrap gap-2 md:mt-8 md:gap-3">
-            {capabilities.map((cap) => (
-              <li key={cap}>
-                <span className="cap-pill inline-block rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs font-medium text-black md:text-sm">
-                  {cap}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      <div className="tech-logos-grid mt-10 border-t border-black/10 pt-8 md:mt-12">
-        <p className="text-xs font-medium uppercase tracking-[0.22em] text-[#888]">
-          Technologies we work with
-        </p>
-        <ul className="mt-6 flex flex-wrap items-center gap-x-10 gap-y-7 sm:gap-x-12 md:gap-x-14">
-          {technologyLogos.map((tech) => (
-            <li key={tech.name} className="group flex flex-col items-center gap-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={techLogoUrl(tech.slug)}
-                alt={tech.name}
-                width={40}
-                height={40}
-                className="h-8 w-auto max-w-[5.5rem] object-contain opacity-[0.42] grayscale transition duration-300 group-hover:opacity-90 group-hover:grayscale-0 sm:h-9"
-                loading="lazy"
-                draggable={false}
-              />
-              <span className="text-[10px] font-medium uppercase tracking-wider text-[#999] transition group-hover:text-[#444] sm:text-[11px]">
-                {tech.name}
-              </span>
+        <ul className="capabilities-pills mx-auto mt-10 flex max-w-4xl flex-wrap justify-center gap-2 md:mt-12 md:gap-3">
+          {capabilities.map((cap) => (
+            <li
+              key={cap}
+              className="cap-pill rounded-full border border-black/10 bg-white px-4 py-2 text-sm font-medium text-black"
+            >
+              {cap}
             </li>
           ))}
         </ul>
+
+      </div>
+
+      <div className="tech-logos-marquee mt-10 border-t border-black/10 pt-8 md:mt-12">
+        <p className="mx-auto max-w-6xl px-4 text-xs font-medium uppercase tracking-[0.22em] text-[#888] lg:px-10">
+          Technologies we work with
+        </p>
+        <TechLogoMarquee />
       </div>
     </section>
   );

@@ -3,9 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { InteractiveLogoReveal } from "@/components/home/InteractiveLogoReveal";
-
-const chars =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+import {
+  HERO_NAME_LINES,
+  SCRAMBLE_CHARS,
+  SCRAMBLE_TICK_COUNT,
+  SCRAMBLE_TICK_MS,
+  scrambleLetterStartS,
+} from "@/lib/hero-scramble";
+import { playNameRevealFlipAudio } from "@/lib/scramble-flip-audio";
 
 const highlights = [
   "AI copilots & automation",
@@ -52,6 +57,8 @@ export function XerouraHero() {
       return;
     }
 
+    void playNameRevealFlipAudio();
+
     const tl = gsap.timeline();
 
     letters.forEach((letterEl, index) => {
@@ -63,16 +70,18 @@ export function XerouraHero() {
           onStart: () => {
             let scrambleCount = 0;
             const interval = setInterval(() => {
-              letterEl.textContent = chars.charAt(Math.floor(Math.random() * chars.length));
+              letterEl.textContent = SCRAMBLE_CHARS.charAt(
+                Math.floor(Math.random() * SCRAMBLE_CHARS.length),
+              );
               scrambleCount++;
-              if (scrambleCount > 6) {
+              if (scrambleCount > SCRAMBLE_TICK_COUNT - 1) {
                 clearInterval(interval);
                 letterEl.textContent = finalChar;
               }
-            }, 40);
+            }, SCRAMBLE_TICK_MS);
           },
         },
-        index * 0.08 + 0.05
+        scrambleLetterStartS(index),
       );
     });
 
@@ -103,8 +112,8 @@ export function XerouraHero() {
 
         <div className="flex flex-col justify-center gap-4 lg:gap-5">
           <div className="space-y-1">
-            <ScrambleLine text="XEROURA" />
-            <ScrambleLine text="TECHNOLOGIES" />
+            <ScrambleLine text={HERO_NAME_LINES[0]} />
+            <ScrambleLine text={HERO_NAME_LINES[1]} />
           </div>
 
           <p className="hero-text max-w-md translate-y-4 text-sm leading-relaxed text-slate-300 opacity-0 sm:text-base">
