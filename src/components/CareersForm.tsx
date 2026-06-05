@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { FormInlineError } from "@/components/FormInlineError";
 import {
+  CAREERS_OTHER_ROLE_ID,
+  careerRoleOptions,
+  roleLabelForApplication,
+} from "@/lib/careers-jobs";
+import {
   validateEmail,
   validateLinkedIn,
   validateOptionalUrl,
@@ -20,6 +25,7 @@ const initial = {
   specialization: "",
   yearsExperience: "",
   preferredRole: "",
+  customRole: "",
   linkedin: "",
   portfolio: "",
   message: "",
@@ -27,15 +33,31 @@ const initial = {
 
 type CareersFormProps = {
   theme?: "default" | "dark";
+  selectedRoleId?: string;
+  onSelectedRoleIdChange?: (roleId: string) => void;
 };
 
-export function CareersForm({ theme = "default" }: CareersFormProps) {
+export function CareersForm({
+  theme = "default",
+  selectedRoleId: selectedRoleIdProp,
+  onSelectedRoleIdChange,
+}: CareersFormProps) {
   const isDark = theme === "dark";
   const [values, setValues] = useState(initial);
+  const [selectedRoleIdState, setSelectedRoleIdState] = useState(CAREERS_OTHER_ROLE_ID);
   const [fileName, setFileName] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+
+  const selectedRoleId = selectedRoleIdProp ?? selectedRoleIdState;
+
+  function setSelectedRoleId(roleId: string) {
+    onSelectedRoleIdChange?.(roleId);
+    if (selectedRoleIdProp === undefined) {
+      setSelectedRoleIdState(roleId);
+    }
+  }
 
   function update<K extends keyof typeof initial>(key: K, value: (typeof initial)[K]) {
     setValues((v) => ({ ...v, [key]: value }));
@@ -46,6 +68,8 @@ export function CareersForm({ theme = "default" }: CareersFormProps) {
     setError(null);
     setStatus("idle");
 
+    const preferredRole = roleLabelForApplication(selectedRoleId, values.customRole);
+
     const checks: (string | null)[] = [
       validateRequiredText(values.fullName, "Full name", 2, 120),
       validateEmail(values.email),
@@ -54,7 +78,9 @@ export function CareersForm({ theme = "default" }: CareersFormProps) {
       validateRequiredText(values.jobTitle, "Job title", 2, 120),
       validateRequiredText(values.specialization, "Specialization", 2, 200),
       validateYearsExperience(values.yearsExperience),
-      validateRequiredText(values.preferredRole, "Preferred role", 2, 120),
+      selectedRoleId === CAREERS_OTHER_ROLE_ID
+        ? validateRequiredText(values.customRole, "Desired role", 2, 120)
+        : null,
       validateLinkedIn(values.linkedin),
       validateOptionalUrl(values.portfolio, "Portfolio / GitHub"),
     ];
@@ -74,7 +100,7 @@ export function CareersForm({ theme = "default" }: CareersFormProps) {
 
     setStatus("loading");
     const fd = new FormData();
-    Object.entries(values).forEach(([k, v]) => fd.append(k, v));
+    Object.entries({ ...values, preferredRole }).forEach(([k, v]) => fd.append(k, v));
     if (file) fd.append("resume", file);
 
     try {
@@ -107,9 +133,38 @@ export function CareersForm({ theme = "default" }: CareersFormProps) {
     ? "text-sm font-medium text-slate-300"
     : "text-sm font-medium text-slate-700 dark:text-slate-300";
 
+  const showCustomRole = selectedRoleId === CAREERS_OTHER_ROLE_ID;
+
   return (
-    <form noValidate onSubmit={onSubmit} className={formClass}>
+    <form id="careers-form" noValidate onSubmit={onSubmit} className={formClass}>
       <div className="grid gap-5 sm:grid-cols-2">
+        <label className={`${labelClass} sm:col-span-2`}>
+          Role you&apos;re applying for *
+          <select
+            className={inputClass}
+            value={selectedRoleId}
+            onChange={(e) => setSelectedRoleId(e.target.value)}
+            name="applicationRole"
+          >
+            {careerRoleOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        {showCustomRole ? (
+          <label className={`${labelClass} sm:col-span-2`}>
+            Desired role *
+            <input
+              className={inputClass}
+              value={values.customRole}
+              onChange={(e) => update("customRole", e.target.value)}
+              name="customRole"
+              placeholder="Tell us the role you have in mind"
+            />
+          </label>
+        ) : null}
         <label className={labelClass}>
           Full name *
           <input
@@ -178,15 +233,6 @@ export function CareersForm({ theme = "default" }: CareersFormProps) {
             placeholder="e.g. 4"
           />
         </label>
-        <label className={labelClass}>
-          Preferred job role *
-          <input
-            className={inputClass}
-            value={values.preferredRole}
-            onChange={(e) => update("preferredRole", e.target.value)}
-            name="preferredRole"
-          />
-        </label>
         <label className={`${labelClass} sm:col-span-2`}>
           Upload resume (PDF / DOC) *
           <input
@@ -239,8 +285,8 @@ export function CareersForm({ theme = "default" }: CareersFormProps) {
       {error ? <FormInlineError message={error} /> : null}
       {status === "success" ? (
         <p className="rounded-2xl border border-emerald-200/90 bg-emerald-50/95 px-4 py-3 text-sm font-medium text-emerald-900 shadow-sm dark:border-emerald-500/25 dark:bg-emerald-950/40 dark:text-emerald-100 dark:shadow-card">
-          Thank you—your details were received. Our team will review your profile and reach
-          out when there is a suitable opportunity.
+          Thank you—your details were received. Our team will review your profile and reach out when
+          there is a suitable opportunity.
         </p>
       ) : null}
 
@@ -253,11 +299,17 @@ export function CareersForm({ theme = "default" }: CareersFormProps) {
       </button>
       <p className={`text-xs ${isDark ? "text-slate-500" : "text-slate-500 dark:text-slate-500"}`}>
         By submitting, you agree to our{" "}
-        <a className={`font-semibold ${isDark ? "text-brand-accent hover:text-white" : "text-brand-primary hover:text-brand-accent"}`} href="/privacy-policy">
+        <a
+          className={`font-semibold ${isDark ? "text-brand-accent hover:text-white" : "text-brand-primary hover:text-brand-accent"}`}
+          href="/privacy-policy"
+        >
           Privacy Policy
         </a>{" "}
         and{" "}
-        <a className={`font-semibold ${isDark ? "text-brand-accent hover:text-white" : "text-brand-primary hover:text-brand-accent"}`} href="/terms-and-conditions">
+        <a
+          className={`font-semibold ${isDark ? "text-brand-accent hover:text-white" : "text-brand-primary hover:text-brand-accent"}`}
+          href="/terms-and-conditions"
+        >
           Terms &amp; Conditions
         </a>
         .

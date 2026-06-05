@@ -350,7 +350,7 @@ export function BottomNav() {
                       <li
                         key={item.href}
                         className={`group relative flex w-full items-center gap-4 border-b border-stone-800 p-4 ${
-                          active ? "min-h-[5.5rem]" : "h-20"
+                          active ? "min-h-[4.75rem]" : "h-[4.25rem]"
                         }`}
                       >
                         {active ? (
@@ -374,24 +374,24 @@ export function BottomNav() {
                           <div
                             className={`pointer-events-none flex shrink-0 items-center justify-center rounded-lg border transition-all duration-300 ${
                               active
-                                ? "h-16 w-16 border-brand-accent/30 bg-brand-accent/[0.09]"
-                                : "h-14 w-14 border-white/10 bg-white/5 group-hover:border-brand-accent/40 group-hover:bg-white/10"
+                                ? "h-14 w-14 border-brand-accent/30 bg-brand-accent/[0.09]"
+                                : "h-12 w-12 border-white/10 bg-white/5 group-hover:border-brand-accent/40 group-hover:bg-white/10"
                             }`}
                           >
                             <NavIcon
                               href={item.href}
                               className={`transition-all duration-300 ${
                                 active
-                                  ? "h-8 w-8 text-brand-accent/90"
-                                  : "h-7 w-7 text-slate-300 group-hover:text-brand-accent"
+                                  ? "h-7 w-7 text-brand-accent/90"
+                                  : "h-6 w-6 text-slate-300 group-hover:text-brand-accent"
                               }`}
                             />
                           </div>
                           <span
                             className={`pointer-events-none flex-1 transition-all duration-300 ${
                               active
-                                ? "text-[1.75rem] font-medium text-white"
-                                : "text-2xl group-hover:translate-x-4"
+                                ? "text-xl font-medium text-white md:text-2xl"
+                                : "text-lg text-slate-100 group-hover:translate-x-3 md:text-xl"
                             }`}
                           >
                             {item.label}
