@@ -57,7 +57,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <link rel="preload" href="/sounds/card-snap.mp3" as="fetch" crossOrigin="anonymous" />
+        <link rel="preload" href="/sounds/name-reveal-flips.mp3" as="fetch" crossOrigin="anonymous" />
       </head>
       <body className="min-h-screen overflow-x-clip font-sans">
         <ThemeProvider>

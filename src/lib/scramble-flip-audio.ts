@@ -1,48 +1,39 @@
-import {
-  SCRAMBLE_TICK_COUNT,
-  SCRAMBLE_TICK_MS,
-  heroLetterCount,
-  scrambleLetterStartS,
-} from "@/lib/hero-scramble";
+/** Pre-mixed flip sequence for the hero name reveal (see scripts/build-name-reveal-audio.mjs). */
+export const NAME_REVEAL_SRC = "/sounds/name-reveal-flips.mp3";
 
-/** Mixkit free SFX — royalty-free, no attribution required. */
-export const SNAP_SRC = "/sounds/card-snap.mp3";
-
-const SNAP_TICK_VOLUME = 0.275;
-const SNAP_LOCK_VOLUME = 0.46;
+const REVEAL_VOLUME = 1;
 const HERO_AUDIO_VISIBLE_RATIO = 0.45;
 
 let primed = false;
-let snapTemplate: HTMLAudioElement | null = null;
-const scheduledTimeouts: number[] = [];
+let revealAudio: HTMLAudioElement | null = null;
 
-function getSnapTemplate() {
+function getRevealAudio() {
   if (typeof window === "undefined") return null;
-  if (!snapTemplate) {
-    snapTemplate = new Audio(SNAP_SRC);
-    snapTemplate.preload = "auto";
-    snapTemplate.load();
+  if (!revealAudio) {
+    revealAudio = new Audio(NAME_REVEAL_SRC);
+    revealAudio.preload = "auto";
+    revealAudio.load();
   }
-  return snapTemplate;
+  return revealAudio;
 }
 
-async function unlockSnapPlayback() {
-  const template = getSnapTemplate();
-  if (!template) return false;
+async function unlockRevealPlayback() {
+  const audio = getRevealAudio();
+  if (!audio) return false;
 
-  template.volume = 0.01;
-  template.muted = true;
+  audio.volume = 0.01;
+  audio.muted = true;
 
   try {
-    await template.play();
-    template.pause();
-    template.currentTime = 0;
-    template.muted = false;
-    template.volume = 1;
+    await audio.play();
+    audio.pause();
+    audio.currentTime = 0;
+    audio.muted = false;
+    audio.volume = REVEAL_VOLUME;
     primed = true;
     return true;
   } catch {
-    template.muted = false;
+    audio.muted = false;
     return false;
   }
 }
@@ -50,11 +41,11 @@ async function unlockSnapPlayback() {
 /** Call as early as possible — works without a tap when navigation still has user activation. */
 export async function primeScrambleAudio() {
   if (typeof window === "undefined") return false;
-  getSnapTemplate();
+  getRevealAudio();
   if (primed) return true;
 
   if (navigator.userActivation?.isActive) {
-    const ok = await unlockSnapPlayback();
+    const ok = await unlockRevealPlayback();
     if (ok) return true;
   }
 
@@ -66,7 +57,7 @@ export function installScrambleAudioUnlock() {
   if (typeof window === "undefined") return () => {};
 
   const unlock = () => {
-    void unlockSnapPlayback();
+    void unlockRevealPlayback();
   };
 
   const opts: AddEventListenerOptions = { once: true, capture: true, passive: true };
@@ -86,29 +77,11 @@ export function installScrambleAudioUnlock() {
   };
 }
 
-function playSnap(volume: number, playbackRate = 1.35) {
-  const audio = new Audio(SNAP_SRC);
-  audio.volume = Math.min(1, volume);
-  audio.playbackRate = playbackRate;
-  void audio.play().catch(() => {});
-}
-
 export function cancelNameRevealFlipAudio() {
-  for (const id of scheduledTimeouts) window.clearTimeout(id);
-  scheduledTimeouts.length = 0;
-}
-
-function scheduleSnap(
-  delayMs: number,
-  volume: number,
-  playbackRate: number,
-  isAudible?: () => boolean,
-) {
-  const id = window.setTimeout(() => {
-    if (isAudible && !isAudible()) return;
-    playSnap(volume, playbackRate);
-  }, delayMs);
-  scheduledTimeouts.push(id);
+  const audio = getRevealAudio();
+  if (!audio) return;
+  audio.pause();
+  audio.currentTime = 0;
 }
 
 export type NameRevealAudioOptions = {
@@ -121,24 +94,14 @@ export async function playNameRevealFlipAudio(options?: NameRevealAudioOptions) 
   cancelNameRevealFlipAudio();
   await primeScrambleAudio();
 
-  const isAudible = options?.isAudible;
-  const letterCount = heroLetterCount();
+  if (options?.isAudible && !options.isAudible()) return;
 
-  for (let index = 0; index < letterCount; index++) {
-    const letterStartMs = scrambleLetterStartS(index) * 1000;
+  const audio = getRevealAudio();
+  if (!audio) return;
 
-    for (let tick = 0; tick < SCRAMBLE_TICK_COUNT; tick++) {
-      scheduleSnap(
-        letterStartMs + tick * SCRAMBLE_TICK_MS,
-        SNAP_TICK_VOLUME,
-        1.75,
-        isAudible,
-      );
-    }
-
-    const lockMs = letterStartMs + SCRAMBLE_TICK_COUNT * SCRAMBLE_TICK_MS;
-    scheduleSnap(lockMs, SNAP_LOCK_VOLUME, 1.35, isAudible);
-  }
+  audio.currentTime = 0;
+  audio.volume = REVEAL_VOLUME;
+  void audio.play().catch(() => {});
 }
 
 export function createHeroAudioGate(heroEl: HTMLElement) {

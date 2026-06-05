@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "process:assets": "node scripts/process-assets.mjs",
+    "build:name-reveal-audio": "node scripts/build-name-reveal-audio.mjs",
     "prebuild": "node scripts/process-assets.mjs"
   },
   "dependencies": {
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
