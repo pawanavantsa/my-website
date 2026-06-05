@@ -10,9 +10,11 @@ export const SNAP_SRC = "/sounds/card-snap.mp3";
 
 const SNAP_TICK_VOLUME = 0.275;
 const SNAP_LOCK_VOLUME = 0.46;
+const HERO_AUDIO_VISIBLE_RATIO = 0.45;
 
 let primed = false;
 let snapTemplate: HTMLAudioElement | null = null;
+const scheduledTimeouts: number[] = [];
 
 function getSnapTemplate() {
   if (typeof window === "undefined") return null;
@@ -91,26 +93,79 @@ function playSnap(volume: number, playbackRate = 1.35) {
   void audio.play().catch(() => {});
 }
 
-function scheduleSnap(delayMs: number, volume: number, playbackRate = 1.35) {
-  window.setTimeout(() => playSnap(volume, playbackRate), delayMs);
+export function cancelNameRevealFlipAudio() {
+  for (const id of scheduledTimeouts) window.clearTimeout(id);
+  scheduledTimeouts.length = 0;
 }
 
-export async function playNameRevealFlipAudio() {
+function scheduleSnap(
+  delayMs: number,
+  volume: number,
+  playbackRate: number,
+  isAudible?: () => boolean,
+) {
+  const id = window.setTimeout(() => {
+    if (isAudible && !isAudible()) return;
+    playSnap(volume, playbackRate);
+  }, delayMs);
+  scheduledTimeouts.push(id);
+}
+
+export type NameRevealAudioOptions = {
+  isAudible?: () => boolean;
+};
+
+export async function playNameRevealFlipAudio(options?: NameRevealAudioOptions) {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+  cancelNameRevealFlipAudio();
   await primeScrambleAudio();
 
+  const isAudible = options?.isAudible;
   const letterCount = heroLetterCount();
 
   for (let index = 0; index < letterCount; index++) {
     const letterStartMs = scrambleLetterStartS(index) * 1000;
 
     for (let tick = 0; tick < SCRAMBLE_TICK_COUNT; tick++) {
-      scheduleSnap(letterStartMs + tick * SCRAMBLE_TICK_MS, SNAP_TICK_VOLUME, 1.75);
+      scheduleSnap(
+        letterStartMs + tick * SCRAMBLE_TICK_MS,
+        SNAP_TICK_VOLUME,
+        1.75,
+        isAudible,
+      );
     }
 
-    const lockMs =
-      letterStartMs + SCRAMBLE_TICK_COUNT * SCRAMBLE_TICK_MS;
-    scheduleSnap(lockMs, SNAP_LOCK_VOLUME, 1.35);
+    const lockMs = letterStartMs + SCRAMBLE_TICK_COUNT * SCRAMBLE_TICK_MS;
+    scheduleSnap(lockMs, SNAP_LOCK_VOLUME, 1.35, isAudible);
   }
+}
+
+export function createHeroAudioGate(heroEl: HTMLElement) {
+  let heroVisible = true;
+  let tabVisible = document.visibilityState === "visible";
+
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      heroVisible = entry.isIntersecting && entry.intersectionRatio >= HERO_AUDIO_VISIBLE_RATIO;
+      if (!heroVisible) cancelNameRevealFlipAudio();
+    },
+    { threshold: [0, HERO_AUDIO_VISIBLE_RATIO, 0.55, 1] },
+  );
+  observer.observe(heroEl);
+
+  const onVisibilityChange = () => {
+    tabVisible = document.visibilityState === "visible";
+    if (!tabVisible) cancelNameRevealFlipAudio();
+  };
+  document.addEventListener("visibilitychange", onVisibilityChange);
+
+  return {
+    isAudible: () => heroVisible && tabVisible,
+    destroy: () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      cancelNameRevealFlipAudio();
+    },
+  };
 }

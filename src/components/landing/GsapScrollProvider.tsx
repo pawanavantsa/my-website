@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { subscribeWelcomeLoaderDone } from "@/lib/home-session";
 import { setLenis } from "@/lib/lenis-instance";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -55,16 +56,14 @@ export function GsapScrollProvider({ children }: { children: React.ReactNode }) 
 
     lenis.on("scroll", ScrollTrigger.update);
 
-    const onWelcomeDone = () => {
+    const unsubscribe = subscribeWelcomeLoaderDone(() => {
       lenis.resize();
       ScrollTrigger.refresh();
-    };
-
-    window.addEventListener("welcome-loader-done", onWelcomeDone);
+    });
     ScrollTrigger.refresh();
 
     return () => {
-      window.removeEventListener("welcome-loader-done", onWelcomeDone);
+      unsubscribe();
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
       ScrollTrigger.clearScrollMemory();
       setLenis(null);

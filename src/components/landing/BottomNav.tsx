@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import useUserActivity from "@/hooks/useUserActivity";
 import { MenuBrandLogo, NavIcon } from "@/components/icons/NavIcon";
+import { subscribeWelcomeLoaderDone } from "@/lib/home-session";
 import { getLenis } from "@/lib/lenis-instance";
 import { navLinks, site } from "@/lib/site";
 
@@ -49,14 +50,13 @@ export function BottomNav() {
     setOpen(false);
     setCollapsedPill(true);
 
-    const onWelcomeDone = () => setVisible(true);
-    window.addEventListener("welcome-loader-done", onWelcomeDone);
+    const unsubscribe = subscribeWelcomeLoaderDone(() => setVisible(true));
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setVisible(true);
     }
 
-    return () => window.removeEventListener("welcome-loader-done", onWelcomeDone);
+    return unsubscribe;
   }, [pathname]);
 
   useEffect(() => {

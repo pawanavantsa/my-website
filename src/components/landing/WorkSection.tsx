@@ -5,6 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Image from "next/image";
 import Link from "next/link";
+import { subscribeWelcomeLoaderDone } from "@/lib/home-session";
 import { unsplash } from "@/lib/media";
 import { ProductIcon } from "@/components/products/ProductIcon";
 import { products } from "@/lib/products";
@@ -137,11 +138,11 @@ export function WorkSection() {
       if (st) updateCounter(st.progress, 1);
     };
 
-    window.addEventListener("welcome-loader-done", refresh);
+    const unsubscribe = subscribeWelcomeLoaderDone(refresh);
     refresh();
 
     return () => {
-      window.removeEventListener("welcome-loader-done", refresh);
+      unsubscribe();
       ctx.revert();
     };
   }, []);

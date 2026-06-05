@@ -10,7 +10,8 @@ import {
   SCRAMBLE_TICK_MS,
   scrambleLetterStartS,
 } from "@/lib/hero-scramble";
-import { playNameRevealFlipAudio } from "@/lib/scramble-flip-audio";
+import { subscribeWelcomeLoaderDone } from "@/lib/home-session";
+import { createHeroAudioGate, playNameRevealFlipAudio } from "@/lib/scramble-flip-audio";
 
 const highlights = [
   "AI copilots & automation",
@@ -37,9 +38,7 @@ export function XerouraHero() {
   const [canScramble, setCanScramble] = useState(false);
 
   useEffect(() => {
-    const startScramble = () => setCanScramble(true);
-    window.addEventListener("welcome-loader-done", startScramble);
-    return () => window.removeEventListener("welcome-loader-done", startScramble);
+    return subscribeWelcomeLoaderDone(() => setCanScramble(true));
   }, []);
 
   useEffect(() => {
@@ -57,7 +56,8 @@ export function XerouraHero() {
       return;
     }
 
-    void playNameRevealFlipAudio();
+    const audioGate = createHeroAudioGate(root);
+    void playNameRevealFlipAudio({ isAudible: audioGate.isAudible });
 
     const tl = gsap.timeline();
 
@@ -97,6 +97,10 @@ export function XerouraHero() {
       },
       "+=0.35"
     );
+
+    return () => {
+      audioGate.destroy();
+    };
   }, [canScramble]);
 
   return (

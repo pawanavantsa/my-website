@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
+import { dispatchWelcomeLoaderDone, markWelcomeSeen, shouldShowWelcome } from "@/lib/home-session";
 import { installScrambleAudioUnlock, primeScrambleAudio } from "@/lib/scramble-flip-audio";
 
 const words = [
@@ -14,10 +15,21 @@ const words = [
   "స్వాగతం",
 ];
 
+function finishWelcomeLoader() {
+  void primeScrambleAudio();
+  dispatchWelcomeLoaderDone();
+}
+
 export function Loader() {
+  const skipWelcomeRef = useRef<boolean | null>(null);
+  if (skipWelcomeRef.current === null && typeof window !== "undefined") {
+    skipWelcomeRef.current = !shouldShowWelcome();
+  }
+  const skipWelcome = skipWelcomeRef.current ?? false;
+
   const [index, setIndex] = useState(0);
   const [fade, setFade] = useState(true);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(skipWelcome);
   const loaderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,12 +38,20 @@ export function Loader() {
   }, []);
 
   useEffect(() => {
+    if (skipWelcome) {
+      finishWelcomeLoader();
+      return;
+    }
+
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) {
-      window.dispatchEvent(new CustomEvent("welcome-loader-done"));
+      markWelcomeSeen();
+      finishWelcomeLoader();
       setDone(true);
       return;
     }
+
+    markWelcomeSeen();
 
     if (index < words.length - 1) {
       const interval = setInterval(() => {
@@ -53,15 +73,14 @@ export function Loader() {
         duration: 1,
         ease: "power3.inOut",
         onComplete: () => {
-          void primeScrambleAudio();
-          window.dispatchEvent(new CustomEvent("welcome-loader-done"));
+          finishWelcomeLoader();
           setDone(true);
         },
       });
     }, 900);
 
     return () => clearTimeout(timeout);
-  }, [index]);
+  }, [index, skipWelcome]);
 
   if (done) return null;
 
