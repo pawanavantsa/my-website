@@ -5,6 +5,9 @@ export const site = {
   description:
     "Xeroura Technologies builds production-ready AI products and enterprise platforms — copilots, workflow automation, and dedicated delivery pods from Hyderabad, India.",
   email: "Connect@Xeroura.com",
+  phone: "+91 92479 41982",
+  cin: "U62010TS2026PTC214589",
+  gstin: "36AAACX6356M1ZS",
   address: {
     lines: [
       "Xeroura Technologies Pvt Ltd",
@@ -25,6 +28,10 @@ export const site = {
 
 export function mailtoHref(email: string = site.email) {
   return `mailto:${email}`;
+}
+
+export function telHref(phone: string = site.phone) {
+  return `tel:${phone.replace(/\s/g, "")}`;
 }
 
 export const navLinks = [

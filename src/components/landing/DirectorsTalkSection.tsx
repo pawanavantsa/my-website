@@ -9,13 +9,13 @@ const directors = [
     quote:
       "We are building Xeroura on a clear premise. AI has to earn trust in production, not only impress in demos. Our products are shaped for measurable outcomes: faster resolution, stronger operations, and teams that stay in control as they scale.",
     name: "Pawankumar Avantsa",
-    role: "CTO",
+    role: "CEO, CTO",
   },
   {
     quote:
       "Our focus is disciplined delivery. We combine rigorous engineering with software people actually adopt. We invest in platforms that work across industries, while keeping implementation practical for the teams who run them every day.",
     name: "Gouthami Nali",
-    role: "CEO",
+    role: "CEO, COO",
   },
 ];
 

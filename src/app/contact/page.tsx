@@ -3,7 +3,7 @@ import { ContactForm } from "@/components/ContactForm";
 import { InnerPageShell } from "@/components/layout/InnerPageShell";
 import { Reveal } from "@/components/Reveal";
 import { ip } from "@/lib/inner-page";
-import { mailtoHref, site } from "@/lib/site";
+import { mailtoHref, site, telHref } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -35,6 +35,25 @@ export default function ContactPage() {
                 <a className={`${ip.link} mt-2 inline-flex text-sm`} href={mailtoHref()}>
                   {site.email}
                 </a>
+              </div>
+              <div className={ip.card}>
+                <h2 className={ip.h3}>Phone</h2>
+                <a className={`${ip.link} mt-2 inline-flex text-sm`} href={telHref()}>
+                  {site.phone}
+                </a>
+              </div>
+              <div className={ip.card}>
+                <h2 className={ip.h3}>Company details</h2>
+                <dl className={`${ip.body} mt-3 space-y-2`}>
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">CIN</dt>
+                    <dd className="mt-0.5 text-sm text-slate-300">{site.cin}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">GSTIN</dt>
+                    <dd className="mt-0.5 text-sm text-slate-300">{site.gstin}</dd>
+                  </div>
+                </dl>
               </div>
               <div className={ip.card}>
                 <h2 className={ip.h3}>Office address</h2>

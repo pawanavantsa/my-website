@@ -81,7 +81,7 @@ export function LandingFooter() {
         </div>
       </div>
 
-      <div className="landing-footer-logo flex flex-1 items-center justify-center px-4">
+      <div className="landing-footer-logo flex flex-1 flex-col items-center justify-center gap-4 px-4">
         <Image
           src={infinityLogo}
           alt="Xeroura"
@@ -91,6 +91,14 @@ export function LandingFooter() {
           sizes="(max-width: 640px) 220px, (max-width: 768px) 280px, 340px"
           priority={false}
         />
+        <div className="text-center text-xs leading-relaxed text-[#888] sm:text-sm">
+          <p>
+            <span className="font-medium text-[#666]">CIN:</span> {site.cin}
+          </p>
+          <p className="mt-1">
+            <span className="font-medium text-[#666]">GSTIN:</span> {site.gstin}
+          </p>
+        </div>
       </div>
     </footer>
   );
