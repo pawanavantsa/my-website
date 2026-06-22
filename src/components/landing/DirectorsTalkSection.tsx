@@ -7,15 +7,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 const directors = [
   {
     quote:
-      "We are building Xeroura on a clear premise. AI has to earn trust in production, not only impress in demos. Our products are shaped for measurable outcomes: faster resolution, stronger operations, and teams that stay in control as they scale.",
+      "Reliable AI only matters when it survives real workloads, not boardroom demos that never reach production. At Xeroura, we design and ship copilots, platforms, and automation built for the teams who run them every day. We are committed to engineering systems that deliver measurable outcomes: faster resolution, stronger operations, and lasting control as our clients scale.",
     name: "Pawankumar Avantsa",
-    role: "CEO, CTO",
   },
   {
     quote:
-      "Our focus is disciplined delivery. We combine rigorous engineering with software people actually adopt. We invest in platforms that work across industries, while keeping implementation practical for the teams who run them every day.",
-    name: "Gouthami Nali",
-    role: "CEO, COO",
+      "True digital transformation happens when cutting-edge technology aligns perfectly with strategic business vision. At Xeroura, our goal is to be more than a technology provider. We aim to be a catalyst for our clients' success. We are committed to delivering agile, intelligent, and secure IT ecosystems that drive efficiency and unlock new corporate potential.",
+    name: "Sai Gouthami Nali",
   },
 ];
 
@@ -77,7 +75,6 @@ export function DirectorsTalkSection() {
               </p>
               <div className="mt-8 border-t border-black/[0.06] pt-6">
                 <h3 className="text-base font-semibold text-black">{director.name}</h3>
-                <p className="mt-1 text-sm text-[#666]">{director.role}</p>
               </div>
             </article>
           ))}
