@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { InteractiveLogoReveal } from "@/components/home/InteractiveLogoReveal";
 import {
@@ -35,11 +35,31 @@ function ScrambleLine({ text, className = "" }: { text: string; className?: stri
 
 export function XerouraHero() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [logoDropping, setLogoDropping] = useState(false);
+  const [impacted, setImpacted] = useState(false);
   const [canScramble, setCanScramble] = useState(false);
 
   useEffect(() => {
-    return subscribeWelcomeLoaderDone(() => setCanScramble(true));
+    const unsubscribe = subscribeWelcomeLoaderDone(() => setLogoDropping(true));
+    // The mark is hidden until the drop starts, so never leave it stranded on a missed signal.
+    const fallback = window.setTimeout(() => setLogoDropping(true), 6000);
+    return () => {
+      unsubscribe();
+      window.clearTimeout(fallback);
+    };
   }, []);
+
+  const onLogoImpact = useCallback(() => {
+    setImpacted(true);
+    setCanScramble(true);
+  }, []);
+
+  // Drop the shake class once it finishes so no transform lingers on the layout grid.
+  useEffect(() => {
+    if (!impacted) return;
+    const timer = window.setTimeout(() => setImpacted(false), 600);
+    return () => window.clearTimeout(timer);
+  }, [impacted]);
 
   useEffect(() => {
     if (!canScramble || !containerRef.current) return;
@@ -109,9 +129,13 @@ export function XerouraHero() {
       ref={containerRef}
       className="relative z-[50] flex h-[100dvh] max-h-[100dvh] items-center overflow-hidden bg-black px-4 pb-20 pt-6 text-white sm:px-6 lg:px-8"
     >
-      <div className="mx-auto grid w-full max-w-7xl items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-12">
+      <div
+        className={`mx-auto grid w-full max-w-7xl items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-12 ${
+          impacted ? "hero-impact-shake" : ""
+        }`}
+      >
         <div className="relative z-10 mx-auto w-full max-w-[min(94vw,600px)] lg:mx-0 lg:max-w-[680px]">
-          <InteractiveLogoReveal />
+          <InteractiveLogoReveal introActive={logoDropping} onImpact={onLogoImpact} />
         </div>
 
         <div className="flex flex-col justify-center gap-4 lg:gap-5">

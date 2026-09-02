@@ -23,5 +23,15 @@ export const logoSrc = "/logo-transparent.png";
 export const shatteredDark = "/logo-shattered-dark.png";
 export const shatteredColor = "/logo-shattered-color.png";
 
+/**
+ * Pieces of the shattered render, split by scripts/build-shatter-pieces.mjs.
+ * Composited at rest they reproduce `shatteredDark` exactly, which keeps the
+ * intro's last frame aligned with the colour hover reveal.
+ */
+export const shatterBody = "/logo-shatter-body.png";
+export const shatterShards = "/logo-shatter-shards.png";
+export const shatterDust = "/logo-shatter-dust.png";
+export const shatterShardsMeta = "/logo-shatter-shards.json";
+
 /** Infinity mark for landing footer (white knocked out in process-assets). */
 export const infinityLogo = "/logo-infinity-transparent.png";

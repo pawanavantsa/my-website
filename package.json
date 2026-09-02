@@ -9,6 +9,7 @@
     "lint": "next lint",
     "process:assets": "node scripts/process-assets.mjs",
     "build:name-reveal-audio": "node scripts/build-name-reveal-audio.mjs",
+    "build:shatter-pieces": "node scripts/build-shatter-pieces.mjs",
     "prebuild": "node scripts/process-assets.mjs"
   },
   "dependencies": {
