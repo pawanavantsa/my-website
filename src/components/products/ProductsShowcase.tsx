@@ -10,6 +10,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { ProductDeviceStage } from "@/components/products/ProductDeviceStage";
+import { ProductDial } from "@/components/products/ProductDial";
 import { ProductNodeField } from "@/components/products/ProductNodeField";
 import {
   measureProductScreens,
@@ -34,14 +35,35 @@ const TITLE_LAYOUT_ID = "products-showcase-title";
 
 /** Opened title size — kept as a named token so the return landing size stays exact. */
 const OPEN_TITLE =
-  "font-display text-[clamp(1.75rem,4vw,3rem)] font-light tracking-[-0.03em] text-white";
+  "font-display text-[clamp(1.55rem,5.5vw,3rem)] font-light tracking-[-0.03em] text-white";
 const LIST_TITLE_HOT =
   "font-display text-[clamp(1.5rem,2.85vw,2.55rem)] font-light tracking-[-0.03em] text-white";
 const LIST_TITLE_IDLE =
   "font-display text-[clamp(1.4rem,2.7vw,2.4rem)] font-light tracking-[-0.03em] text-[#7a7a7a]";
+/** Dial type runs smaller — several names share the arc on a phone. */
+const DIAL_TITLE_HOT =
+  "font-display text-[clamp(1.15rem,4.8vw,1.7rem)] font-light tracking-[-0.03em] text-white";
+const DIAL_TITLE_IDLE =
+  "font-display text-[clamp(1.05rem,4.3vw,1.55rem)] font-light tracking-[-0.03em] text-[#6f6f6f]";
+
+/** Mobile gets the dial; desktop keeps the hover list. */
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobile(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
+  return isMobile;
+}
 
 export function ProductsShowcase({ products }: ProductsShowcaseProps) {
   const reduced = useReducedMotion();
+  const isMobile = useIsMobile();
   /** null = not hovering; sticky `activeIndex` stays highlighted (inQ on load, last opened after close) */
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -84,6 +106,28 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
       openRafRef.current = null;
     }
   };
+
+  // The showcase is a fixed stage — the dial owns vertical gestures, so the
+  // page itself must not scroll or rubber-band underneath it.
+  useEffect(() => {
+    const html = document.documentElement;
+    const { body } = document;
+    const previous = {
+      htmlOverflow: html.style.overflow,
+      bodyOverflow: body.style.overflow,
+      overscroll: body.style.overscrollBehavior,
+    };
+
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+
+    return () => {
+      html.style.overflow = previous.htmlOverflow;
+      body.style.overflow = previous.bodyOverflow;
+      body.style.overscrollBehavior = previous.overscroll;
+    };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -201,7 +245,7 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
             the shared-layout morph (measuring 3D holes, morphing in 2D). */}
         <motion.div
           ref={stageRef}
-          className={`absolute left-6 top-2 z-20 w-[min(88vw,520px)] sm:left-10 sm:top-6 sm:w-[min(72vw,600px)] lg:left-14 lg:top-10 ${
+          className={`absolute left-[13vw] right-[13vw] top-3 z-20 md:left-10 md:right-auto md:top-6 md:w-[min(72vw,600px)] lg:left-14 lg:top-10 ${
             opened || stageLocked ? "pointer-events-none" : ""
           }`}
           initial={false}
@@ -233,16 +277,23 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
         />
 
         {/* Galaxy sits behind everything: z-[5] is above the page but under
-            both UI panels (z-20), so it can span the full stage. */}
-        <ProductNodeField
-          count={products.length}
-          activeIndex={previewIndex}
-          dimmed={opened}
-          className="absolute left-[56%] top-1/2 z-[5] h-[min(118vh,1320px)] w-[min(96vw,1320px)] -translate-x-1/2 -translate-y-1/2"
-        />
+            both UI panels (z-20), so it can span the full stage. Softened on
+            phone so devices + list keep the stage. Outer opacity wraps the
+            field so it doesn't fight the dimmed opacity-0/100 toggle. */}
+        <div
+          className="pointer-events-none absolute left-1/2 top-[46%] z-[5] h-[min(88vh,700px)] w-[min(142vw,700px)] -translate-x-1/2 -translate-y-1/2 opacity-40 md:left-[56%] md:top-1/2 md:h-[min(118vh,1320px)] md:w-[min(96vw,1320px)] md:opacity-100"
+          aria-hidden
+        >
+          <ProductNodeField
+            count={products.length}
+            activeIndex={previewIndex}
+            dimmed={opened}
+            className="h-full w-full"
+          />
+        </div>
 
         <div
-          className={`absolute bottom-36 left-6 z-20 max-w-[min(88vw,26rem)] transition-opacity duration-500 sm:bottom-40 sm:left-10 sm:max-w-[28rem] lg:bottom-28 lg:left-14 ${
+          className={`absolute bottom-36 left-6 z-20 hidden max-w-[min(88vw,26rem)] transition-opacity duration-500 md:block sm:bottom-40 sm:left-10 sm:max-w-[28rem] lg:bottom-28 lg:left-14 ${
             opened ? "pointer-events-none opacity-0" : "opacity-100"
           }`}
           aria-hidden={opened}
@@ -264,6 +315,49 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
           </p>
         </div>
 
+        {/* Mobile: the dial replaces hover. One of the two is mounted at a
+            time — both carry TITLE_LAYOUT_ID, and two live copies would fight
+            over the shared morph. */}
+        {isMobile ? (
+          <div
+            className={`pointer-events-none absolute inset-x-0 bottom-0 top-[28%] z-20 transition-opacity duration-300 ${
+              opened ? "opacity-0" : "opacity-100"
+            }`}
+            aria-hidden={opened}
+          >
+            {/* Eyebrow sits on the dial's own axis, so its line always points
+                at whichever name is currently selected. */}
+            <div className="absolute left-5 top-[44%] flex -translate-y-1/2 items-center gap-2">
+              <p className="text-[0.6rem] font-medium uppercase tracking-[0.28em] text-white/35">
+                Our products
+              </p>
+              <span
+                className="h-px w-7 bg-gradient-to-r from-white/10 to-white/40"
+                aria-hidden
+              />
+            </div>
+
+            <ProductDial
+              products={products}
+              activeIndex={previewIndex}
+              onActiveChange={(index) => {
+                if (!opened) setHoverIndex(index);
+              }}
+              onSelect={openProduct}
+              titleLayoutId={TITLE_LAYOUT_ID}
+              bridgeIndex={
+                !opened && titleBridge && !reduced ? activeIndex : undefined
+              }
+              titleTransition={{ layout: { duration: DURATION, ease: EASE } }}
+              hotClassName={DIAL_TITLE_HOT}
+              idleClassName={DIAL_TITLE_IDLE}
+              disabled={opened}
+              className="pointer-events-auto absolute inset-y-0 right-0 w-[58vw]"
+            />
+          </div>
+        ) : null}
+
+        {isMobile ? null : (
         <div
           className={`absolute bottom-24 right-10 z-20 max-w-[min(92vw,30rem)] text-right sm:bottom-28 sm:right-16 lg:bottom-16 lg:right-24 ${
             opened ? "pointer-events-none opacity-0" : "opacity-100"
@@ -281,7 +375,7 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
             <span className="h-px w-14 bg-white/20 sm:w-24" aria-hidden />
           </div>
 
-          <ul className="flex max-h-[48dvh] flex-col items-end gap-1.5 overflow-y-auto pr-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:gap-2 sm:max-h-none [&::-webkit-scrollbar]:hidden">
+          <ul className="flex flex-col items-end gap-1.5 pr-1 sm:gap-2">
             {products.map((product, index) => {
               const isHovered = hoverIndex === index;
               const isSticky = hoverIndex === null && index === activeIndex;
@@ -364,6 +458,7 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
             })}
           </ul>
         </div>
+        )}
 
         <AnimatePresence>
           {opened ? (
@@ -379,12 +474,12 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
                 className="absolute inset-0 z-0 cursor-default bg-transparent"
               />
 
-              <div className="pointer-events-none relative z-10 flex h-full flex-col items-center overflow-hidden px-6 pb-10 pt-14 sm:px-10 sm:pb-12 sm:pt-16 lg:pt-[4.5rem]">
+              <div className="pointer-events-none relative z-10 flex h-full flex-col items-center overflow-hidden px-4 pb-24 pt-12 sm:px-10 sm:pb-12 sm:pt-16 lg:pt-[4.5rem]">
                 <div className="pointer-events-auto flex max-h-full w-full max-w-[min(92vw,48rem)] flex-col items-center">
                   <motion.h2
                     layoutId={titleShared ? TITLE_LAYOUT_ID : undefined}
                     transition={{ layout: { duration: DURATION, ease: EASE } }}
-                    className={`mb-8 shrink-0 text-center sm:mb-10 ${OPEN_TITLE}`}
+                    className={`mb-5 shrink-0 text-center sm:mb-10 ${OPEN_TITLE}`}
                   >
                     {active.name}
                   </motion.h2>
@@ -396,7 +491,7 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
                   />
 
                   <motion.div
-                    className="mt-8 w-full max-w-xl self-start sm:mt-10"
+                    className="mt-5 w-full max-w-xl self-start sm:mt-10"
                     initial={reduced ? false : { opacity: 0, y: 18 }}
                     animate={
                       detailsOut
@@ -410,7 +505,7 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
                     }
                   >
                     <div className="flex items-center gap-4">
-                      <p className="shrink-0 text-base font-semibold text-white sm:text-lg">
+                      <p className="shrink-0 text-sm font-semibold text-white sm:text-lg">
                         {active.tag}
                       </p>
                       <div className="relative h-px min-w-0 flex-1">
@@ -429,14 +524,10 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
                         />
                       </div>
                     </div>
-                    <p className="mt-4 text-sm leading-relaxed text-white/45 sm:text-[0.95rem]">
+                    <p className="mt-3 text-sm leading-relaxed text-white/45 sm:mt-4 sm:text-[0.95rem]">
                       {active.overview}
                     </p>
-                    <p className="mt-4 text-sm text-white/55">
-                      Want to create something with {active.name}? Let&apos;s do
-                      it.
-                    </p>
-                    <div className="mt-5 flex flex-wrap gap-3">
+                    <div className="mt-4 flex flex-wrap gap-3 sm:mt-5">
                       <Link
                         href="/contact"
                         className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-white/90"

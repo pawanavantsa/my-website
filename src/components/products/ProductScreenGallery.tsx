@@ -50,14 +50,14 @@ export function ProductScreenGallery({
   if (hasWeb && hasMobile) {
     return (
       <div
-        className={`flex w-full items-end justify-center gap-4 sm:gap-5 ${className}`}
+        className={`flex w-full items-end justify-center gap-3 sm:gap-5 ${className}`}
       >
         <ScreenFrame
           layoutId={bridge ? WEB_SCREEN_LAYOUT_ID : undefined}
           src={web.src}
           alt={web.alt}
           radius={16}
-          className="aspect-[16/9] w-[min(56vw,36rem)] max-h-[min(38dvh,21rem)]"
+          className="aspect-[16/9] w-[min(52vw,36rem)] max-h-[min(28dvh,21rem)] sm:max-h-[min(38dvh,21rem)] sm:w-[min(56vw,36rem)]"
           fit="cover"
         />
         <ScreenFrame
@@ -65,7 +65,7 @@ export function ProductScreenGallery({
           src={mobile.src}
           alt={mobile.alt}
           radius={24}
-          className="aspect-[9/16] h-[min(38dvh,21rem)] w-auto"
+          className="aspect-[9/16] h-[min(28dvh,21rem)] w-auto sm:h-[min(38dvh,21rem)]"
           fit="contain"
         />
       </div>
@@ -80,7 +80,7 @@ export function ProductScreenGallery({
           src={mobile.src}
           alt={mobile.alt}
           radius={26}
-          className="aspect-[9/16] h-[min(50dvh,28rem)] w-auto"
+          className="aspect-[9/16] h-[min(36dvh,28rem)] w-auto sm:h-[min(50dvh,28rem)]"
           fit="contain"
         />
       </div>
@@ -94,7 +94,7 @@ export function ProductScreenGallery({
         src={web.src}
         alt={web.alt}
         radius={16}
-        className="aspect-[16/9] w-[min(70vw,42rem)] max-h-[min(40dvh,23rem)]"
+        className="aspect-[16/9] w-[min(88vw,42rem)] max-h-[min(30dvh,23rem)] sm:w-[min(70vw,42rem)] sm:max-h-[min(40dvh,23rem)]"
         fit="cover"
       />
     </div>
