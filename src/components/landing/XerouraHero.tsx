@@ -57,7 +57,7 @@ export function XerouraHero() {
   // Drop the shake class once it finishes so no transform lingers on the layout grid.
   useEffect(() => {
     if (!impacted) return;
-    const timer = window.setTimeout(() => setImpacted(false), 600);
+    const timer = window.setTimeout(() => setImpacted(false), 420);
     return () => window.clearTimeout(timer);
   }, [impacted]);
 

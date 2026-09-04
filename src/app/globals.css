@@ -169,13 +169,13 @@ html.home-scroll body {
     transform: translate3d(0, 0, 0);
   }
   14% {
-    transform: translate3d(0, 7px, 0);
+    transform: translate3d(0, 5px, 0);
   }
   30% {
-    transform: translate3d(-2px, -4px, 0);
+    transform: translate3d(-1px, -3px, 0);
   }
   48% {
-    transform: translate3d(2px, 3px, 0);
+    transform: translate3d(1px, 2px, 0);
   }
   68% {
     transform: translate3d(-1px, -1px, 0);
@@ -186,7 +186,7 @@ html.home-scroll body {
 }
 
 .hero-impact-shake {
-  animation: hero-impact-shake 0.52s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  animation: hero-impact-shake 0.38s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 @keyframes menu-active-glow {
