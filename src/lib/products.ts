@@ -1,11 +1,12 @@
-import { unsplash } from "@/lib/media";
-
 export type ProductSlide = {
   src: string;
   alt: string;
   /** Local recordings can use video; remote Unsplash stays image. */
   kind?: "image" | "video";
 };
+
+/** Which device poses the product showcase should use. */
+export type ProductPlatforms = "web" | "mobile" | "both";
 
 export type Product = {
   slug: string;
@@ -14,43 +15,51 @@ export type Product = {
   overview: string;
   features: string[];
   accent: string;
-  /** Right-panel slideshow while this product is hovered / focused. */
+  platforms: ProductPlatforms;
+  /** Screen art for the laptop bezel (web / desktop UI). */
+  webScreen?: ProductSlide;
+  /** Screen art for the phone bezel (mobile UI only). */
+  mobileScreen?: ProductSlide;
+  /** Fallback / legacy single preview (used if a device screen is missing). */
   hoverSlides: ProductSlide[];
 };
 
-const slide = (src: string, alt: string, kind: ProductSlide["kind"] = "image"): ProductSlide => ({
+const slide = (
+  src: string,
+  alt: string,
+  kind: ProductSlide["kind"] = "image",
+): ProductSlide => ({
   src,
   alt,
   kind,
 });
 
-/**
- * inQ hover media — replace these with your recordings under
- * `public/products/inq/` (mp4/webm or stills) when ready.
- */
-const inqPlaceholders: ProductSlide[] = [
-  slide(unsplash.aiNeural, "inQ — intelligence workspace preview"),
-  slide(unsplash.dataAbstract, "inQ — live insight surfaces"),
-  slide(unsplash.codingDesk, "inQ — operator console preview"),
-];
-
 export const products: Product[] = [
   {
     slug: "inq",
     name: "inQ",
-    tag: "Intelligent query & insight platform",
+    tag: "School OS for modern campuses",
     overview:
-      "inQ turns enterprise questions into instant, trusted answers — grounded in your systems, workflows, and knowledge so teams decide faster without hunting across tools.",
+      "inQ is the operating system for schools — admissions, attendance, fees, academics, and parent communication in one grounded workspace for admins, teachers, and families.",
     features: [
-      "Natural-language queries across systems",
-      "Grounded answers with source citations",
-      "Role-aware access to sensitive data",
-      "Live dashboards & saved inquiries",
-      "Workflow handoff to tickets & copilots",
-      "Audit trail for every answer",
+      "Unified school dashboard & ops pulse",
+      "Attendance, marks, and homework surfaces",
+      "Admissions pipeline & fee collection",
+      "Parent / student mobile experience",
+      "Notices, calendar, and activity feeds",
+      "Role-aware access across the campus",
     ],
     accent: "from-brand-accent to-cyan-400",
-    hoverSlides: inqPlaceholders,
+    platforms: "both",
+    webScreen: slide("/products/inq/web.jpg", "inQ School OS — web dashboard"),
+    mobileScreen: slide(
+      "/products/inq/mobile.jpg",
+      "inQ — student mobile home",
+    ),
+    hoverSlides: [
+      slide("/products/inq/web.jpg", "inQ School OS — web dashboard"),
+      slide("/products/inq/mobile.jpg", "inQ — student mobile home"),
+    ],
   },
   {
     slug: "xeroura-cs",
@@ -67,10 +76,16 @@ export const products: Product[] = [
       "Analytics & reporting",
     ],
     accent: "from-brand-primary to-indigo-500",
+    platforms: "web",
+    webScreen: slide(
+      "/products/xeroura-cs/web.jpg",
+      "Xeroura CS — service desk dashboard",
+    ),
     hoverSlides: [
-      slide(unsplash.teamMeeting, "Xeroura CS — service desk collaboration"),
-      slide(unsplash.heroCollaboration, "Xeroura CS — unified operations"),
-      slide(unsplash.cloudServer, "Xeroura CS — platform reliability"),
+      slide(
+        "/products/xeroura-cs/web.jpg",
+        "Xeroura CS — service desk dashboard",
+      ),
     ],
   },
   {
@@ -88,10 +103,69 @@ export const products: Product[] = [
       "Productivity boost across teams",
     ],
     accent: "from-brand-accent to-cyan-300",
+    platforms: "web",
+    webScreen: slide(
+      "/products/livebot/web.jpg",
+      "LiveBot — context-aware on-screen assist",
+    ),
     hoverSlides: [
-      slide(unsplash.codingDesk, "LiveBot — on-screen guidance"),
-      slide(unsplash.productDesign, "LiveBot — employee workflows"),
-      slide(unsplash.aiNeural, "LiveBot — contextual AI assist"),
+      slide(
+        "/products/livebot/web.jpg",
+        "LiveBot — context-aware on-screen assist",
+      ),
+    ],
+  },
+  {
+    slug: "focusmate",
+    name: "FocusMate",
+    tag: "Mobile focus companion for deep work",
+    overview:
+      "FocusMate helps people protect attention on the go — timed focus sessions, gentle nudges, and a calm mobile ritual that keeps priorities clear without another desktop distraction.",
+    features: [
+      "Session timers & focus modes",
+      "Smart break reminders",
+      "Priority queue for the day",
+      "Distraction blocking cues",
+      "Streaks & gentle accountability",
+      "Works entirely on mobile",
+    ],
+    accent: "from-violet-500 to-fuchsia-400",
+    platforms: "mobile",
+    mobileScreen: slide(
+      "/products/focusmate/mobile.jpg",
+      "FocusMate — deep focus home",
+    ),
+    hoverSlides: [
+      slide("/products/focusmate/mobile.jpg", "FocusMate — deep focus home"),
+    ],
+  },
+  {
+    slug: "reachai",
+    name: "ReachAI",
+    tag: "Outreach intelligence for web & mobile",
+    overview:
+      "ReachAI helps teams plan, personalize, and measure outreach across channels — a shared web workspace for ops plus a mobile companion for reps in the field.",
+    features: [
+      "Campaign workspace on web",
+      "Field companion on mobile",
+      "Personalized message assist",
+      "Reply & sentiment signals",
+      "Pipeline-aware follow-ups",
+      "Shared analytics across devices",
+    ],
+    accent: "from-sky-500 to-brand-accent",
+    platforms: "both",
+    webScreen: slide(
+      "/products/reachai/web.jpg",
+      "ReachAI — outreach workspace",
+    ),
+    mobileScreen: slide(
+      "/products/reachai/mobile.jpg",
+      "ReachAI — field companion",
+    ),
+    hoverSlides: [
+      slide("/products/reachai/web.jpg", "ReachAI — outreach workspace"),
+      slide("/products/reachai/mobile.jpg", "ReachAI — field companion"),
     ],
   },
   {
@@ -109,10 +183,13 @@ export const products: Product[] = [
       "Multi-channel deployment",
     ],
     accent: "from-violet-500 to-brand-primary",
+    platforms: "web",
+    webScreen: slide(
+      "/products/xeroura-ai/web.jpg",
+      "Xeroura AI — copilot studio",
+    ),
     hoverSlides: [
-      slide(unsplash.aiNeural, "Xeroura AI — copilot canvas"),
-      slide(unsplash.dataAbstract, "Xeroura AI — enterprise knowledge"),
-      slide(unsplash.cloudServer, "Xeroura AI — governed deployment"),
+      slide("/products/xeroura-ai/web.jpg", "Xeroura AI — copilot studio"),
     ],
   },
   {
@@ -130,31 +207,16 @@ export const products: Product[] = [
       "Human-in-the-loop steps",
     ],
     accent: "from-brand-primary to-brand-accent",
+    platforms: "web",
+    webScreen: slide(
+      "/products/xeroura-flow/web.jpg",
+      "Xeroura Flow — workflow designer",
+    ),
     hoverSlides: [
-      slide(unsplash.productDesign, "Xeroura Flow — workflow design"),
-      slide(unsplash.teamMeeting, "Xeroura Flow — approvals & handoffs"),
-      slide(unsplash.cloudServer, "Xeroura Flow — connected systems"),
-    ],
-  },
-  {
-    slug: "xeroura-docai",
-    name: "Xeroura DocAI",
-    tag: "Document intelligence at scale",
-    overview:
-      "Extract, classify, and summarize contracts, invoices, and operational documents—with review queues built for regulated and high-volume environments.",
-    features: [
-      "OCR & structured extraction",
-      "Template-free learning",
-      "Clause & risk highlighting",
-      "Batch processing",
-      "Export to downstream systems",
-      "Reviewer workflows",
-    ],
-    accent: "from-amber-500 to-orange-400",
-    hoverSlides: [
-      slide(unsplash.codingDesk, "Xeroura DocAI — document intake"),
-      slide(unsplash.dataAbstract, "Xeroura DocAI — extraction & review"),
-      slide(unsplash.heroCollaboration, "Xeroura DocAI — team review queues"),
+      slide(
+        "/products/xeroura-flow/web.jpg",
+        "Xeroura Flow — workflow designer",
+      ),
     ],
   },
   {
@@ -172,10 +234,16 @@ export const products: Product[] = [
       "Data warehouse connectors",
     ],
     accent: "from-cyan-500 to-blue-600",
+    platforms: "web",
+    webScreen: slide(
+      "/products/xeroura-insight/web.jpg",
+      "Xeroura Insight — analytics workspace",
+    ),
     hoverSlides: [
-      slide(unsplash.dataAbstract, "Xeroura Insight — analytics surfaces"),
-      slide(unsplash.aiNeural, "Xeroura Insight — decision intelligence"),
-      slide(unsplash.teamMeeting, "Xeroura Insight — business narratives"),
+      slide(
+        "/products/xeroura-insight/web.jpg",
+        "Xeroura Insight — analytics workspace",
+      ),
     ],
   },
   {
@@ -193,10 +261,21 @@ export const products: Product[] = [
       "Telephony integrations",
     ],
     accent: "from-rose-500 to-pink-500",
+    platforms: "both",
+    webScreen: slide(
+      "/products/xeroura-voice/web.jpg",
+      "Xeroura Voice — live call floor",
+    ),
+    mobileScreen: slide(
+      "/products/xeroura-voice/mobile.jpg",
+      "Xeroura Voice — mobile companion",
+    ),
     hoverSlides: [
-      slide(unsplash.heroCollaboration, "Xeroura Voice — contact operations"),
-      slide(unsplash.cloudServer, "Xeroura Voice — telephony stack"),
-      slide(unsplash.teamMeeting, "Xeroura Voice — agent assist"),
+      slide("/products/xeroura-voice/web.jpg", "Xeroura Voice — live call floor"),
+      slide(
+        "/products/xeroura-voice/mobile.jpg",
+        "Xeroura Voice — mobile companion",
+      ),
     ],
   },
   {
@@ -214,52 +293,16 @@ export const products: Product[] = [
       "Compliance report packs",
     ],
     accent: "from-slate-500 to-brand-navy",
+    platforms: "web",
+    webScreen: slide(
+      "/products/xeroura-guard/web.jpg",
+      "Xeroura Guard — security console",
+    ),
     hoverSlides: [
-      slide(unsplash.cloudServer, "Xeroura Guard — secure AI controls"),
-      slide(unsplash.dataAbstract, "Xeroura Guard — policy monitoring"),
-      slide(unsplash.codingDesk, "Xeroura Guard — audit workflows"),
-    ],
-  },
-  {
-    slug: "xeroura-teams",
-    name: "Xeroura Teams",
-    tag: "Delivery & ops copilot",
-    overview:
-      "A copilot for engineering and operations pods—sprint context, runbooks, incident history, and status updates in one place for faster delivery.",
-    features: [
-      "Sprint & backlog context",
-      "Runbook retrieval",
-      "Incident summarization",
-      "Status report drafts",
-      "Tool integrations (Jira, Slack)",
-      "Team knowledge graph",
-    ],
-    accent: "from-emerald-500 to-teal-400",
-    hoverSlides: [
-      slide(unsplash.teamMeeting, "Xeroura Teams — delivery pods"),
-      slide(unsplash.productDesign, "Xeroura Teams — sprint context"),
-      slide(unsplash.codingDesk, "Xeroura Teams — ops copilots"),
-    ],
-  },
-  {
-    slug: "xeroura-connect",
-    name: "Xeroura Connect",
-    tag: "Integration & API orchestration",
-    overview:
-      "Connect SaaS, legacy APIs, and data stores with managed pipelines—so AI products and automations share a consistent, observable integration layer.",
-    features: [
-      "Prebuilt connectors",
-      "Event-driven sync",
-      "Transformation layer",
-      "Retry & dead-letter handling",
-      "API gateway patterns",
-      "Monitoring & alerts",
-    ],
-    accent: "from-indigo-500 to-violet-500",
-    hoverSlides: [
-      slide(unsplash.cloudServer, "Xeroura Connect — integration fabric"),
-      slide(unsplash.dataAbstract, "Xeroura Connect — event pipelines"),
-      slide(unsplash.aiNeural, "Xeroura Connect — observable APIs"),
+      slide(
+        "/products/xeroura-guard/web.jpg",
+        "Xeroura Guard — security console",
+      ),
     ],
   },
 ];
@@ -269,8 +312,8 @@ export const featuredProductNames = [
   "inQ",
   "Xeroura CS",
   "LiveBot",
-  "Xeroura AI",
-  "Xeroura Flow",
+  "FocusMate",
+  "ReachAI",
 ] as const;
 
 export function getProductByName(name: string): Product | undefined {
@@ -279,4 +322,12 @@ export function getProductByName(name: string): Product | undefined {
 
 export function getProductBySlug(slug: string): Product | undefined {
   return products.find((p) => p.slug === slug);
+}
+
+export function productHasWeb(product: Product): boolean {
+  return product.platforms === "web" || product.platforms === "both";
+}
+
+export function productHasMobile(product: Product): boolean {
+  return product.platforms === "mobile" || product.platforms === "both";
 }

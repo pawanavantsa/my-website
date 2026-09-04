@@ -1,1 +1,1 @@
-Place inQ hover recordings / stills here, then update hoverSlides in src/lib/products.ts.
+Place product screen stills/recordings here (web.jpg, mobile.jpg, etc.).

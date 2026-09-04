@@ -55,11 +55,19 @@ export function ProductIcon({ slug, className = "h-10 w-10" }: ProductIconProps)
           <path d="M18 22l10-6M18 26l10 6" {...stroke} />
         </svg>
       );
-    case "xeroura-docai":
+    case "focusmate":
       return (
         <svg viewBox="0 0 48 48" className={shared} fill="none" aria-hidden>
-          <path d="M14 8h14l8 8v24a2 2 0 01-2 2H14a2 2 0 01-2-2V10a2 2 0 012-2z" {...stroke} />
-          <path d="M28 8v8h8M16 22h16M16 28h12M16 34h10" {...stroke} className="text-brand-accent" />
+          <circle cx="24" cy="24" r="14" {...stroke} className="text-brand-accent" />
+          <path d="M24 16v9l6 4" {...stroke} />
+        </svg>
+      );
+    case "reachai":
+      return (
+        <svg viewBox="0 0 48 48" className={shared} fill="none" aria-hidden>
+          <path d="M10 28c6-12 22-12 28 0" {...stroke} className="text-brand-accent" />
+          <path d="M14 32c5-8 15-8 20 0" {...stroke} />
+          <circle cx="24" cy="18" r="3" {...stroke} />
         </svg>
       );
     case "xeroura-insight":
@@ -81,23 +89,6 @@ export function ProductIcon({ slug, className = "h-10 w-10" }: ProductIconProps)
         <svg viewBox="0 0 48 48" className={shared} fill="none" aria-hidden>
           <path d="M24 6l14 6v12c0 9-6 14-14 18-8-4-14-9-14-18V12l14-6z" {...stroke} className="text-brand-accent" />
           <path d="M18 24l4 4 8-8" {...stroke} />
-        </svg>
-      );
-    case "xeroura-teams":
-      return (
-        <svg viewBox="0 0 48 48" className={shared} fill="none" aria-hidden>
-          <circle cx="18" cy="16" r="5" {...stroke} />
-          <circle cx="32" cy="18" r="4" {...stroke} className="text-brand-accent" />
-          <path d="M8 36c0-6 4-10 10-10s10 4 10 10M26 36c0-5 3-8 8-8" {...stroke} />
-        </svg>
-      );
-    case "xeroura-connect":
-      return (
-        <svg viewBox="0 0 48 48" className={shared} fill="none" aria-hidden>
-          <circle cx="12" cy="24" r="4" {...stroke} />
-          <circle cx="36" cy="14" r="4" {...stroke} className="text-brand-accent" />
-          <circle cx="36" cy="34" r="4" {...stroke} className="text-brand-accent" />
-          <path d="M16 22h8l6-6M16 26h8l6 6" {...stroke} />
         </svg>
       );
     case "more":
