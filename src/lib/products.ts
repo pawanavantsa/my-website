@@ -1,3 +1,12 @@
+import { unsplash } from "@/lib/media";
+
+export type ProductSlide = {
+  src: string;
+  alt: string;
+  /** Local recordings can use video; remote Unsplash stays image. */
+  kind?: "image" | "video";
+};
+
 export type Product = {
   slug: string;
   name: string;
@@ -5,9 +14,44 @@ export type Product = {
   overview: string;
   features: string[];
   accent: string;
+  /** Right-panel slideshow while this product is hovered / focused. */
+  hoverSlides: ProductSlide[];
 };
 
+const slide = (src: string, alt: string, kind: ProductSlide["kind"] = "image"): ProductSlide => ({
+  src,
+  alt,
+  kind,
+});
+
+/**
+ * inQ hover media — replace these with your recordings under
+ * `public/products/inq/` (mp4/webm or stills) when ready.
+ */
+const inqPlaceholders: ProductSlide[] = [
+  slide(unsplash.aiNeural, "inQ — intelligence workspace preview"),
+  slide(unsplash.dataAbstract, "inQ — live insight surfaces"),
+  slide(unsplash.codingDesk, "inQ — operator console preview"),
+];
+
 export const products: Product[] = [
+  {
+    slug: "inq",
+    name: "inQ",
+    tag: "Intelligent query & insight platform",
+    overview:
+      "inQ turns enterprise questions into instant, trusted answers — grounded in your systems, workflows, and knowledge so teams decide faster without hunting across tools.",
+    features: [
+      "Natural-language queries across systems",
+      "Grounded answers with source citations",
+      "Role-aware access to sensitive data",
+      "Live dashboards & saved inquiries",
+      "Workflow handoff to tickets & copilots",
+      "Audit trail for every answer",
+    ],
+    accent: "from-brand-accent to-cyan-400",
+    hoverSlides: inqPlaceholders,
+  },
   {
     slug: "xeroura-cs",
     name: "Xeroura CS",
@@ -23,6 +67,11 @@ export const products: Product[] = [
       "Analytics & reporting",
     ],
     accent: "from-brand-primary to-indigo-500",
+    hoverSlides: [
+      slide(unsplash.teamMeeting, "Xeroura CS — service desk collaboration"),
+      slide(unsplash.heroCollaboration, "Xeroura CS — unified operations"),
+      slide(unsplash.cloudServer, "Xeroura CS — platform reliability"),
+    ],
   },
   {
     slug: "livebot",
@@ -39,6 +88,11 @@ export const products: Product[] = [
       "Productivity boost across teams",
     ],
     accent: "from-brand-accent to-cyan-300",
+    hoverSlides: [
+      slide(unsplash.codingDesk, "LiveBot — on-screen guidance"),
+      slide(unsplash.productDesign, "LiveBot — employee workflows"),
+      slide(unsplash.aiNeural, "LiveBot — contextual AI assist"),
+    ],
   },
   {
     slug: "xeroura-ai",
@@ -55,6 +109,11 @@ export const products: Product[] = [
       "Multi-channel deployment",
     ],
     accent: "from-violet-500 to-brand-primary",
+    hoverSlides: [
+      slide(unsplash.aiNeural, "Xeroura AI — copilot canvas"),
+      slide(unsplash.dataAbstract, "Xeroura AI — enterprise knowledge"),
+      slide(unsplash.cloudServer, "Xeroura AI — governed deployment"),
+    ],
   },
   {
     slug: "xeroura-flow",
@@ -71,6 +130,11 @@ export const products: Product[] = [
       "Human-in-the-loop steps",
     ],
     accent: "from-brand-primary to-brand-accent",
+    hoverSlides: [
+      slide(unsplash.productDesign, "Xeroura Flow — workflow design"),
+      slide(unsplash.teamMeeting, "Xeroura Flow — approvals & handoffs"),
+      slide(unsplash.cloudServer, "Xeroura Flow — connected systems"),
+    ],
   },
   {
     slug: "xeroura-docai",
@@ -87,6 +151,11 @@ export const products: Product[] = [
       "Reviewer workflows",
     ],
     accent: "from-amber-500 to-orange-400",
+    hoverSlides: [
+      slide(unsplash.codingDesk, "Xeroura DocAI — document intake"),
+      slide(unsplash.dataAbstract, "Xeroura DocAI — extraction & review"),
+      slide(unsplash.heroCollaboration, "Xeroura DocAI — team review queues"),
+    ],
   },
   {
     slug: "xeroura-insight",
@@ -103,6 +172,11 @@ export const products: Product[] = [
       "Data warehouse connectors",
     ],
     accent: "from-cyan-500 to-blue-600",
+    hoverSlides: [
+      slide(unsplash.dataAbstract, "Xeroura Insight — analytics surfaces"),
+      slide(unsplash.aiNeural, "Xeroura Insight — decision intelligence"),
+      slide(unsplash.teamMeeting, "Xeroura Insight — business narratives"),
+    ],
   },
   {
     slug: "xeroura-voice",
@@ -119,6 +193,11 @@ export const products: Product[] = [
       "Telephony integrations",
     ],
     accent: "from-rose-500 to-pink-500",
+    hoverSlides: [
+      slide(unsplash.heroCollaboration, "Xeroura Voice — contact operations"),
+      slide(unsplash.cloudServer, "Xeroura Voice — telephony stack"),
+      slide(unsplash.teamMeeting, "Xeroura Voice — agent assist"),
+    ],
   },
   {
     slug: "xeroura-guard",
@@ -135,6 +214,11 @@ export const products: Product[] = [
       "Compliance report packs",
     ],
     accent: "from-slate-500 to-brand-navy",
+    hoverSlides: [
+      slide(unsplash.cloudServer, "Xeroura Guard — secure AI controls"),
+      slide(unsplash.dataAbstract, "Xeroura Guard — policy monitoring"),
+      slide(unsplash.codingDesk, "Xeroura Guard — audit workflows"),
+    ],
   },
   {
     slug: "xeroura-teams",
@@ -151,6 +235,11 @@ export const products: Product[] = [
       "Team knowledge graph",
     ],
     accent: "from-emerald-500 to-teal-400",
+    hoverSlides: [
+      slide(unsplash.teamMeeting, "Xeroura Teams — delivery pods"),
+      slide(unsplash.productDesign, "Xeroura Teams — sprint context"),
+      slide(unsplash.codingDesk, "Xeroura Teams — ops copilots"),
+    ],
   },
   {
     slug: "xeroura-connect",
@@ -167,18 +256,27 @@ export const products: Product[] = [
       "Monitoring & alerts",
     ],
     accent: "from-indigo-500 to-violet-500",
+    hoverSlides: [
+      slide(unsplash.cloudServer, "Xeroura Connect — integration fabric"),
+      slide(unsplash.dataAbstract, "Xeroura Connect — event pipelines"),
+      slide(unsplash.aiNeural, "Xeroura Connect — observable APIs"),
+    ],
   },
 ];
 
 /** Highlighted on the home 10+ card */
 export const featuredProductNames = [
+  "inQ",
   "Xeroura CS",
   "LiveBot",
   "Xeroura AI",
   "Xeroura Flow",
-  "Xeroura DocAI",
 ] as const;
 
 export function getProductByName(name: string): Product | undefined {
   return products.find((p) => p.name === name);
+}
+
+export function getProductBySlug(slug: string): Product | undefined {
+  return products.find((p) => p.slug === slug);
 }

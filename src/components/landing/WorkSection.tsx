@@ -15,8 +15,8 @@ const productsCard = {
   description:
     "Xeroura ships a growing portfolio of production-ready AI platforms and copilots. From customer service and employee assist to document intelligence and workflow automation, each product is built to deploy quickly, integrate with your stack, and prove value in live environments.",
   groups: [
-    ["Xeroura CS", "LiveBot", "Xeroura AI", "Xeroura Flow", "Xeroura DocAI"],
-    ["Xeroura Insight", "Xeroura Voice", "Xeroura Guard", "Xeroura Teams", "Xeroura Connect"],
+    ["inQ", "Xeroura CS", "LiveBot", "Xeroura AI", "Xeroura Flow"],
+    ["Xeroura DocAI", "Xeroura Insight", "Xeroura Voice", "Xeroura Guard", "Xeroura Teams"],
   ],
 };
 

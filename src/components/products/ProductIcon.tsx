@@ -14,6 +14,14 @@ export function ProductIcon({ slug, className = "h-10 w-10" }: ProductIconProps)
   const shared = `${className} text-brand-primary`;
 
   switch (slug) {
+    case "inq":
+      return (
+        <svg viewBox="0 0 48 48" className={shared} fill="none" aria-hidden>
+          <circle cx="22" cy="22" r="11" {...stroke} className="text-brand-accent" />
+          <path d="M30 30l8 8" {...stroke} />
+          <path d="M18 22h8M22 18v8" {...stroke} />
+        </svg>
+      );
     case "xeroura-cs":
       return (
         <svg viewBox="0 0 48 48" className={shared} fill="none" aria-hidden>
