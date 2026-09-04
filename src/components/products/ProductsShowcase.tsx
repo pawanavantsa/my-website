@@ -238,7 +238,7 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
           count={products.length}
           activeIndex={previewIndex}
           dimmed={opened}
-          className="absolute left-[56%] top-1/2 z-[5] h-[min(104vh,1100px)] w-[min(86vw,1100px)] -translate-x-1/2 -translate-y-1/2"
+          className="absolute left-[56%] top-1/2 z-[5] h-[min(118vh,1320px)] w-[min(96vw,1320px)] -translate-x-1/2 -translate-y-1/2"
         />
 
         <div

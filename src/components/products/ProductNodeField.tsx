@@ -24,6 +24,16 @@ import { useReducedMotion } from "framer-motion";
 const FOCAL = 1000;
 /** Sphere the product nodes sit on, in world units. */
 const RADIUS = 300;
+/**
+ * Unlabelled nodes mixed in with the product ones. Products alone are too few
+ * to read as a field, and the eye can count them; fillers give the lattice
+ * depth without implying more products than we ship.
+ */
+const FILLER_NODES = 18;
+/** Filler nodes and their wires stay behind the product ones. */
+const FILLER_WEIGHT = 0.6;
+/** How many neighbours each filler wires into. */
+const FILLER_LINKS = 2;
 /** Backdrop stars sit much further out so they parallax slowly. */
 const STAR_RADIUS = 1150;
 const STAR_COUNT = 220;
@@ -61,6 +71,36 @@ function mulberry32(seed: number) {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+/**
+ * Fillers get their own even spread rather than the product spiral's unused
+ * slots. Striding that spiral looks even by index but advances longitude by
+ * ~2.5 golden angles a step, which packs every product into one hemisphere and
+ * leaves the other side bare.
+ *
+ * Latitudes sit at cell centres so they interleave with the product ring, and
+ * radii vary a little so the field doesn't read as one hollow shell.
+ */
+function fillerLayout(count: number, radius: number): Vec3[] {
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  const rand = mulberry32(0xf111e2);
+  const points: Vec3[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const y = 1 - ((i + 0.5) / count) * 2;
+    const ring = Math.sqrt(Math.max(0, 1 - y * y));
+    // Phase offset keeps fillers off the product nodes' longitudes.
+    const theta = golden * i + 0.9;
+    const r = radius * (0.84 + rand() * 0.26);
+    points.push({
+      x: Math.cos(theta) * ring * r,
+      y: y * r,
+      z: Math.sin(theta) * ring * r,
+    });
+  }
+
+  return points;
 }
 
 function starField(): Vec3[] {
@@ -202,7 +242,7 @@ function arcPoints(a: Vec3, b: Vec3): Vec3[] {
 }
 
 type ProductNodeFieldProps = {
-  /** Total products — one node each. */
+  /** Total products — one node each, plus FILLER_NODES unlabelled ones. */
   count: number;
   /** Product currently hovered / active; the camera travels to its node. */
   activeIndex: number;
@@ -228,14 +268,47 @@ export function ProductNodeField({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const homes = sphereLayout(count, RADIUS);
-    const drifts = driftParams(count);
+    // Products first, fillers after — so index < count is a product, and the
+    // camera's target list is just the product slice.
+    const homes = [
+      ...sphereLayout(count, RADIUS),
+      ...fillerLayout(FILLER_NODES, RADIUS),
+    ];
+    const total = homes.length;
+    const drifts = driftParams(total);
     const stars = starField();
-    const targets = homes.map(focusAngles);
 
-    const pairs: Array<[number, number]> = [];
-    for (let i = 0; i < homes.length; i++) {
-      for (let j = i + 1; j < homes.length; j++) pairs.push([i, j]);
+    const targets = homes.slice(0, count).map(focusAngles);
+
+    const pairs: Array<{ a: number; b: number; weight: number }> = [];
+    const seen = new Set<string>();
+    const link = (a: number, b: number, weight: number) => {
+      const key = a < b ? `${a}:${b}` : `${b}:${a}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      pairs.push({ a, b, weight });
+    };
+
+    // Products stay fully meshed — that wiring is the point of the visual.
+    for (let i = 0; i < count; i++) {
+      for (let j = i + 1; j < count; j++) link(i, j, 1);
+    }
+
+    // Fillers only wire to their nearest neighbours: a full mesh over every
+    // node would be a solid ball of lines (and O(n^2) arcs per frame).
+    for (let i = count; i < total; i++) {
+      const near = homes
+        .map((h, j) => ({
+          j,
+          d:
+            (h.x - homes[i].x) ** 2 +
+            (h.y - homes[i].y) ** 2 +
+            (h.z - homes[i].z) ** 2,
+        }))
+        .filter((o) => o.j !== i)
+        .sort((m, n) => m.d - n.d)
+        .slice(0, FILLER_LINKS);
+      for (const { j } of near) link(i, j, FILLER_WEIGHT);
     }
 
     let width = 0;
@@ -297,7 +370,7 @@ export function ProductNodeField({
       // Slight pull-back at the midpoint of a flight — a cinematic beat that
       // makes the travel legible rather than a straight cut.
       const pull = 1 - 0.06 * Math.sin(Math.PI * raw);
-      const scale = (Math.min(width, height) / (RADIUS * 2.55)) * pull;
+      const scale = (Math.min(width, height) / (RADIUS * 2.15)) * pull;
 
       const project = (v: Vec3) => {
         const k = FOCAL / (FOCAL - v.z);
@@ -340,7 +413,7 @@ export function ProductNodeField({
       // --- connections: great-circle arcs, depth-graded ------------------
       ctx.lineCap = "round";
       for (let i = 0; i < pairs.length; i++) {
-        const [a, b] = pairs[i];
+        const { a, b, weight } = pairs[i];
         const pts = arcPoints(live[a], live[b]).map((p) =>
           project(rotate(p, yaw, pitch)),
         );
@@ -357,14 +430,14 @@ export function ProductNodeField({
           pts[pts.length - 1].y,
         );
         const fade = (k: number) =>
-          `rgba(116,182,255,${(Math.max(0, k - 0.72) * 0.34).toFixed(3)})`;
+          `rgba(116,182,255,${(Math.max(0, k - 0.72) * 0.34 * weight).toFixed(3)})`;
         grad.addColorStop(0, fade(ka));
         grad.addColorStop(0.5, fade((ka + kb) / 2));
         grad.addColorStop(1, fade(kb));
 
         ctx.globalAlpha = 1;
         ctx.strokeStyle = grad;
-        ctx.lineWidth = Math.max(0.3, ((ka + kb) / 2) * 0.62);
+        ctx.lineWidth = Math.max(0.3, ((ka + kb) / 2) * 0.62 * weight);
         ctx.beginPath();
         ctx.moveTo(pts[0].x, pts[0].y);
         for (let s = 1; s < pts.length; s++) ctx.lineTo(pts[s].x, pts[s].y);
@@ -381,21 +454,22 @@ export function ProductNodeField({
         // Everything about a node comes from its depth alone — no special
         // casing for the active one. It's the front-most, so it's the biggest.
         const depth = Math.max(0.15, p.k - 0.62);
-        const core = 2.1 * p.k;
-        const halo = 14 * p.k;
+        const weight = i < count ? 1 : FILLER_WEIGHT;
+        const core = 2.1 * p.k * weight;
+        const halo = 14 * p.k * weight;
 
         const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, halo);
         glow.addColorStop(0, "#cfe9ff");
         glow.addColorStop(0.3, "#54a6f0");
         glow.addColorStop(1, "rgba(30,90,190,0)");
 
-        ctx.globalAlpha = Math.min(1, depth * 0.62);
+        ctx.globalAlpha = Math.min(1, depth * 0.62 * weight);
         ctx.fillStyle = glow;
         ctx.beginPath();
         ctx.arc(p.x, p.y, halo, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.globalAlpha = Math.min(1, 0.28 + depth * 0.95);
+        ctx.globalAlpha = Math.min(1, (0.28 + depth * 0.95) * weight);
         ctx.fillStyle = "#eaf6ff";
         ctx.beginPath();
         ctx.arc(p.x, p.y, core, 0, Math.PI * 2);
