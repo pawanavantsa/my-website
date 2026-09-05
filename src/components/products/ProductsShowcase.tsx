@@ -245,7 +245,7 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
             Desktop: bottom-left under the belief copy. */}
         <motion.div
           ref={stageRef}
-          className={`absolute left-[8vw] right-[8vw] bottom-3 top-auto z-20 md:left-10 md:right-auto md:bottom-8 md:w-[min(68vw,560px)] lg:left-14 lg:bottom-12 ${
+          className={`absolute left-[8vw] right-[8vw] -bottom-2 top-auto z-20 md:left-10 md:right-auto md:bottom-2 md:w-[min(68vw,560px)] lg:left-14 lg:bottom-4 ${
             opened || stageLocked ? "pointer-events-none" : ""
           }`}
           initial={false}
