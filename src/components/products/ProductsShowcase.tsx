@@ -241,11 +241,11 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
         className="relative h-[100dvh] w-full overflow-hidden bg-[#0a0a0a] text-white"
         aria-label="Products showcase"
       >
-        {/* Devices stay mounted. Screens hide while flat flight anchors own
-            the shared-layout morph (measuring 3D holes, morphing in 2D). */}
+        {/* Devices + rock. Mobile: bottom of the stage under the dial.
+            Desktop: bottom-left under the belief copy. */}
         <motion.div
           ref={stageRef}
-          className={`absolute left-[13vw] right-[13vw] top-3 z-20 md:left-10 md:right-auto md:top-6 md:w-[min(72vw,600px)] lg:left-14 lg:top-10 ${
+          className={`absolute left-[8vw] right-[8vw] bottom-3 top-auto z-20 md:left-10 md:right-auto md:bottom-8 md:w-[min(68vw,560px)] lg:left-14 lg:bottom-12 ${
             opened || stageLocked ? "pointer-events-none" : ""
           }`}
           initial={false}
@@ -261,7 +261,7 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
             type="button"
             onClick={() => openProduct(previewIndex)}
             tabIndex={opened || stageLocked ? -1 : 0}
-            className="relative block aspect-[16/11] w-full bg-transparent text-left outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-accent"
+            className="relative block aspect-[16/11] w-full overflow-visible bg-transparent text-left outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-accent"
           >
             <ProductDeviceStage
               product={active}
@@ -293,23 +293,23 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
         </div>
 
         <div
-          className={`absolute bottom-36 left-6 z-20 hidden max-w-[min(88vw,26rem)] transition-opacity duration-500 md:block sm:bottom-40 sm:left-10 sm:max-w-[28rem] lg:bottom-28 lg:left-14 ${
+          className={`absolute left-5 top-4 z-20 max-w-[min(88vw,26rem)] transition-opacity duration-500 sm:left-10 sm:top-10 sm:max-w-[28rem] lg:left-14 lg:top-12 ${
             opened ? "pointer-events-none opacity-0" : "opacity-100"
           }`}
           aria-hidden={opened}
         >
-          <div className="mb-5 flex items-center gap-3">
-            <p className="text-[0.7rem] font-medium uppercase tracking-[0.28em] text-white/35">
+          <div className="mb-2.5 flex items-center gap-3 sm:mb-5">
+            <p className="text-[0.62rem] font-medium uppercase tracking-[0.28em] text-white/35 sm:text-[0.7rem]">
               Our belief
             </p>
-            <span className="h-px w-14 bg-white/20 sm:w-20" aria-hidden />
+            <span className="h-px w-10 bg-white/20 sm:w-20" aria-hidden />
           </div>
-          <h2 className="font-display text-[clamp(1.9rem,3.2vw,2.65rem)] font-light leading-[1.12] tracking-[-0.03em] text-[#e8f4ff]">
-            Better tools.
+          <h2 className="font-display text-[clamp(1.45rem,6.2vw,2.65rem)] font-light leading-[1.12] tracking-[-0.03em]">
+            <span className="text-white">Better tools.</span>
             <br />
-            Brighter people.
+            <span className="text-[#7ec8ff]">Brighter people.</span>
           </h2>
-          <p className="mt-5 max-w-[24rem] text-[1.05rem] leading-relaxed text-white/40 sm:text-[1.1rem]">
+          <p className="mt-3 hidden max-w-[24rem] text-[1.05rem] leading-relaxed text-white/40 sm:mt-5 sm:block sm:text-[1.1rem]">
             Tools that take on the busywork — so people can stay sharp on what
             matters.
           </p>
@@ -317,17 +317,18 @@ export function ProductsShowcase({ products }: ProductsShowcaseProps) {
 
         {/* Mobile: the dial replaces hover. One of the two is mounted at a
             time — both carry TITLE_LAYOUT_ID, and two live copies would fight
-            over the shared morph. */}
+            over the shared morph. Shifted up so belief sits above and devices
+            keep the bottom. */}
         {isMobile ? (
           <div
-            className={`pointer-events-none absolute inset-x-0 bottom-0 top-[28%] z-20 transition-opacity duration-300 ${
+            className={`pointer-events-none absolute inset-x-0 bottom-[26%] top-[16%] z-20 transition-opacity duration-300 ${
               opened ? "opacity-0" : "opacity-100"
             }`}
             aria-hidden={opened}
           >
             {/* Eyebrow sits on the dial's own axis, so its line always points
                 at whichever name is currently selected. */}
-            <div className="absolute left-5 top-[44%] flex -translate-y-1/2 items-center gap-2">
+            <div className="absolute left-5 top-[42%] flex -translate-y-1/2 items-center gap-2">
               <p className="text-[0.6rem] font-medium uppercase tracking-[0.28em] text-white/35">
                 Our products
               </p>

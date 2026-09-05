@@ -24,6 +24,7 @@ const LID_FRONT = "/products/devices/mbp-lid-front.png";
 const LID_BACK = "/products/devices/mbp-lid-back.png";
 const DECK = "/products/devices/mbp-deck-top.png";
 const PHONE = "/products/devices/iphone-flat.png";
+const ROCK = "/products/devices/rock-platform.png";
 
 /** Shared chassis corner radius — matches processed texture rounding. */
 const CHASSIS_RADIUS = "2.4%";
@@ -80,6 +81,29 @@ const PHONE_LAYERS = 14;
 /** Step between layers, in % of the phone's width (container query units). */
 const PHONE_LAYER_STEP = (PHONE_DEPTH * 100) / PHONE_LAYERS;
 
+/**
+ * Presentation angles. Positive yaw swings the right edge away, so the LEFT
+ * side of the chassis faces camera — the three-quarter view in the reference.
+ * The phone turns the other way so its own right side wall reads instead.
+ */
+const LAPTOP_YAW = 14;
+const LAPTOP_PITCH = 3;
+const PHONE_YAW = -15;
+
+/**
+ * Base slab thickness as a fraction of the laptop's width (real MacBook is
+ * ~16mm over 304mm). Extruded from the deck silhouette the same way as the
+ * phone, so the side wall follows the real rounded outline at any yaw.
+ */
+const DECK_DEPTH = 0.045;
+const DECK_LAYERS = 6;
+const DECK_LAYER_STEP = (DECK_DEPTH * 100) / DECK_LAYERS;
+
+/** The lid is far thinner, but its edge still has to read at yaw. */
+const LID_DEPTH = 0.016;
+const LID_LAYERS = 3;
+const LID_LAYER_STEP = (LID_DEPTH * 100) / LID_LAYERS;
+
 type ProductDeviceStageProps = {
   product: Product;
   showTag?: boolean;
@@ -115,31 +139,29 @@ export function ProductDeviceStage({
 
   return (
     <div className={`relative h-full w-full bg-transparent ${className}`}>
-      {/* Ambient light behind the devices — lifts them off the black page
-          without haloing the lid itself. Sits first in DOM so it paints under
-          the devices, which carry no z-index of their own. */}
+      {/* Key light from the galaxy side; everything else is ambient bounce. */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <div
-          className="absolute left-[2%] top-[6%] h-[88%] w-[90%] blur-3xl"
+          className="absolute left-[8%] top-[6%] h-[72%] w-[80%] blur-3xl"
           style={{
             borderRadius: "50%",
             background:
-              "radial-gradient(ellipse at 50% 55%, rgba(78,150,240,0.42) 0%, rgba(38,92,190,0.24) 36%, rgba(20,50,120,0.1) 58%, transparent 80%)",
-          }}
-        />
-        <div
-          className="absolute bottom-0 left-[8%] h-[28%] w-[78%] blur-2xl"
-          style={{
-            borderRadius: "50%",
-            background:
-              "radial-gradient(ellipse at 50% 50%, rgba(120,190,255,0.38) 0%, rgba(80,150,230,0.14) 42%, transparent 74%)",
+              "radial-gradient(ellipse at 64% 46%, rgba(90,160,245,0.32) 0%, rgba(40,95,190,0.13) 44%, transparent 74%)",
           }}
         />
       </div>
 
-      <div className="absolute inset-0 flex items-end justify-center px-[1%] pb-[2%]">
+      <DeskSurface />
+
+      {/* Devices stand on the ledge. Each keeps its OWN camera so the internal
+          hinge and extrusion geometry stay exact — the yaw is applied inside
+          that camera (see Laptop/Phone). */}
+      <div className="absolute inset-0 flex items-end justify-center px-[1%] pb-[12%]">
         <div className="relative h-full w-full max-w-[48rem]">
-          <div className="absolute bottom-0 left-[4%] h-[96%] aspect-[100/84]">
+          <div
+            className="absolute bottom-[2%] left-[1%] h-[94%] aspect-[100/84]"
+            style={{ containerType: "inline-size" }}
+          >
             <Laptop
               open={hasWeb}
               reduced={!!reduced}
@@ -165,6 +187,40 @@ export function ProductDeviceStage({
           {product.tag}
         </p>
       ) : null}
+    </div>
+  );
+}
+
+/**
+ * Photoreal basalt plinth the machines stand on. A rendered plate rather than
+ * CSS gradients — chiselled rock facets and a wet-stone top are exactly what
+ * gradients can't fake, and it fades into pure black so it needs no masking.
+ */
+function DeskSurface() {
+  return (
+    <div
+      className="pointer-events-none absolute inset-x-[-6%] bottom-[-6%] z-0 h-[38%]"
+      aria-hidden
+    >
+      <Image
+        src={ROCK}
+        alt=""
+        width={1536}
+        height={543}
+        className="h-full w-full select-none object-cover object-top"
+        sizes="(max-width: 768px) 100vw, 700px"
+        priority
+      />
+
+      {/* Cool skim from the galaxy side, keeping the stone in the same light
+          as the devices. */}
+      <div
+        className="absolute inset-0 mix-blend-screen"
+        style={{
+          background:
+            "radial-gradient(ellipse at 68% 18%, rgba(120,170,235,0.14) 0%, transparent 58%)",
+        }}
+      />
     </div>
   );
 }
@@ -214,13 +270,16 @@ function Laptop({
       className="relative h-full w-full"
       style={{ perspective: 1750, perspectiveOrigin: "50% 58%" }}
     >
-      <motion.div
+      {/* Placement is STATIC: the base is bolted to the desk, so closing the
+          machine only swings the lid. Animating the assembly here instead tips
+          the whole chassis and the bottom appears to lift off the surface.
+          Yaw/pitch sit inside the perspective above so this is a real turn. */}
+      <div
         className="absolute inset-0"
-        style={{ transformStyle: "preserve-3d" }}
-        initial={false}
-        // Camera leans over the shut machine so the cover reads as a top face.
-        animate={reduced ? undefined : { rotateX: open ? 0 : 9 }}
-        transition={{ duration: 0.95, ease: EASE }}
+        style={{
+          transform: `rotateY(${LAPTOP_YAW}deg) rotateX(${LAPTOP_PITCH}deg)`,
+          transformStyle: "preserve-3d",
+        }}
       >
         {/* Contact shadow, tightening as the machine closes. */}
         <motion.div
@@ -232,25 +291,57 @@ function Laptop({
           aria-hidden
         />
 
+        {/* Base slab: the deck silhouette stepped down its own normal, so the
+            chassis has real thickness and its side wall reads under yaw. Same
+            trick as the phone — a drawn rail can't follow the rounded corners. */}
         <div
-          className="absolute left-0 w-full origin-top overflow-hidden"
+          className="absolute left-0 w-full origin-top"
           style={{
             top: PANEL_BAND,
             height: PANEL_BAND,
             transform: `rotateX(${DECK_TILT}deg)`,
-            borderRadius: CHASSIS_RADIUS,
+            transformStyle: "preserve-3d",
           }}
         >
-          <Image
-            src={DECK}
-            alt=""
-            width={1273}
-            height={853}
-            className="h-full w-full select-none object-fill"
-            sizes="(max-width: 768px) 70vw, 620px"
-            priority
-            aria-hidden
-          />
+          {Array.from({ length: DECK_LAYERS }, (_, i) => (
+            <div
+              key={i}
+              className="absolute inset-0 overflow-hidden"
+              style={{
+                transform: `translateZ(-${((i + 1) * DECK_LAYER_STEP).toFixed(3)}cqw)`,
+                borderRadius: CHASSIS_RADIUS,
+              }}
+              aria-hidden
+            >
+              <Image
+                src={DECK}
+                alt=""
+                width={1273}
+                height={853}
+                className="h-full w-full select-none object-fill"
+                style={{
+                  filter: `brightness(${(0.46 - (i / DECK_LAYERS) * 0.3).toFixed(3)})`,
+                }}
+                sizes="(max-width: 768px) 70vw, 620px"
+              />
+            </div>
+          ))}
+
+          <div
+            className="absolute inset-0 overflow-hidden"
+            style={{ borderRadius: CHASSIS_RADIUS }}
+          >
+            <Image
+              src={DECK}
+              alt=""
+              width={1273}
+              height={853}
+              className="h-full w-full select-none object-fill"
+              sizes="(max-width: 768px) 70vw, 620px"
+              priority
+              aria-hidden
+            />
+          </div>
         </div>
 
         <motion.div
@@ -262,6 +353,29 @@ function Laptop({
             rotateX: hinge,
           }}
         >
+          {/* Lid thickness — same extrusion, a fraction of the deck's depth. */}
+          {Array.from({ length: LID_LAYERS }, (_, i) => (
+            <div
+              key={i}
+              className="absolute inset-0 overflow-hidden"
+              style={{
+                transform: `translateZ(-${((i + 1) * LID_LAYER_STEP).toFixed(3)}cqw)`,
+                borderRadius: CHASSIS_RADIUS,
+              }}
+              aria-hidden
+            >
+              <Image
+                src={LID_BACK}
+                alt=""
+                width={1536}
+                height={1024}
+                className="h-full w-full select-none object-fill"
+                style={{ filter: `brightness(${(0.4 - i * 0.08).toFixed(2)})` }}
+                sizes="(max-width: 768px) 70vw, 620px"
+              />
+            </div>
+          ))}
+
           <LidFront
             open={open}
             contentSrc={contentSrc}
@@ -273,7 +387,7 @@ function Laptop({
           <motion.div
             className="absolute inset-0 overflow-hidden"
             style={{
-              transform: "rotateY(180deg)",
+              transform: `translateZ(-${(LID_DEPTH * 100).toFixed(3)}cqw) rotateY(180deg)`,
               backfaceVisibility: "hidden",
               borderRadius: CHASSIS_RADIUS,
               visibility: facingBack,
@@ -291,7 +405,7 @@ function Laptop({
             />
           </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -392,7 +506,7 @@ function Phone({
     // containerType makes 1cqw == 1% of the phone's width, which is the only
     // way to express the Z depth responsively (translateZ takes no percentages).
     <div
-      className="absolute bottom-[1%] right-[2%] z-[2] w-[16%]"
+      className="absolute bottom-0 right-[4%] z-[3] w-[18%]"
       style={{ containerType: "inline-size" }}
     >
       {/* Ground contact shadow — stays flat instead of tipping with the body,
@@ -416,146 +530,159 @@ function Phone({
         className="relative w-full"
         style={{ perspective: 900, perspectiveOrigin: "50% 100%" }}
       >
-        <motion.div
-          className="relative w-full origin-bottom will-change-transform"
+        {/* Yaw is a STATIC PARENT of the tip: the phone is turned where it
+            stands, then falls about its own bottom edge. Folding the yaw into
+            the same transform as the lay-down rotateX re-aims the Y axis at the
+            camera mid-fall, which is what made the body look warped. */}
+        <div
+          className="relative w-full"
           style={{
-            aspectRatio: `${PHONE_W} / ${PHONE_H}`,
+            transform: `rotateY(${PHONE_YAW}deg)`,
+            transformOrigin: "50% 100%",
             transformStyle: "preserve-3d",
           }}
-          initial={false}
-          // Pivot is the group's bottom edge, which the nesting below places at
-          // the chassis' BACK bottom edge — so it tips like a solid box.
-          animate={
-            reduced
-              ? undefined
-              : up
-                ? {
-                    rotateX: 0,
-                    scale: lead ? 1.3 : 1,
-                    x: lead ? "-6%" : "0%",
-                    y: lead ? "1%" : "0%",
-                  }
-                : { rotateX: 72, scale: 0.96, x: "0%", y: "0%" }
-          }
-          transition={{ duration: 0.95, ease: EASE }}
         >
-          {/* Depth plane: carries the geometry only, laid horizontal from the
-            pivot so its far edge lands at the chassis' FRONT bottom edge. */}
-          <div
-            className="absolute bottom-0 left-0 w-full origin-bottom"
+          <motion.div
+            className="relative w-full origin-bottom will-change-transform"
             style={{
-              aspectRatio: `${1 / PHONE_DEPTH}`,
-              transform: "rotateX(-90deg)",
+              aspectRatio: `${PHONE_W} / ${PHONE_H}`,
               transformStyle: "preserve-3d",
             }}
+            initial={false}
+            // Pivot is the group's bottom edge, which the nesting below places
+            // at the chassis' BACK bottom edge — so it tips like a solid box.
+            animate={
+              reduced
+                ? undefined
+                : up
+                  ? {
+                      rotateX: 0,
+                      scale: lead ? 1.3 : 1,
+                      x: lead ? "-6%" : "0%",
+                      y: lead ? "1%" : "0%",
+                    }
+                  : { rotateX: 72, scale: 0.96, x: "0%", y: "0%" }
+            }
+            transition={{ duration: 0.95, ease: EASE }}
           >
-            {/* Port detail only — the chassis material comes from the extrusion
-              below. Kept inside the flat bottom run so it can never flare. */}
+            {/* Depth plane: carries the geometry only, laid horizontal from the
+            pivot so its far edge lands at the chassis' FRONT bottom edge. */}
             <div
-              className="absolute inset-y-0 left-[19.6%] w-[60.8%]"
-              aria-hidden
-            >
-              <span
-                className="absolute left-1/2 top-[34%] h-[30%] w-[20%] -translate-x-1/2 rounded-full bg-[#08080a]"
-                style={{ boxShadow: "inset 0 0.5px 0 rgba(255,255,255,0.2)" }}
-              />
-              <span className="absolute left-[18%] top-[45%] h-[11%] w-[4%] rounded-full bg-black/70" />
-              <span className="absolute right-[14%] top-[45%] h-[11%] w-[4%] rounded-full bg-black/70" />
-              <span className="absolute right-[21%] top-[45%] h-[11%] w-[4%] rounded-full bg-black/70" />
-            </div>
-
-            {/* Screen face stands back up from that front edge, so it ends up a
-              full chassis depth in front of the pivot. */}
-            <div
-              className="absolute bottom-full left-0 w-full origin-bottom"
+              className="absolute bottom-0 left-0 w-full origin-bottom"
               style={{
-                aspectRatio: `${PHONE_W} / ${PHONE_H}`,
-                transform: "rotateX(90deg)",
+                aspectRatio: `${1 / PHONE_DEPTH}`,
+                transform: "rotateX(-90deg)",
                 transformStyle: "preserve-3d",
               }}
             >
-              {/* Chassis body: the phone's own outline stepped back in Z, so the
+              {/* Port detail only — the chassis material comes from the extrusion
+              below. Kept inside the flat bottom run so it can never flare. */}
+              <div
+                className="absolute inset-y-0 left-[19.6%] w-[60.8%]"
+                aria-hidden
+              >
+                <span
+                  className="absolute left-1/2 top-[34%] h-[30%] w-[20%] -translate-x-1/2 rounded-full bg-[#08080a]"
+                  style={{ boxShadow: "inset 0 0.5px 0 rgba(255,255,255,0.2)" }}
+                />
+                <span className="absolute left-[18%] top-[45%] h-[11%] w-[4%] rounded-full bg-black/70" />
+                <span className="absolute right-[14%] top-[45%] h-[11%] w-[4%] rounded-full bg-black/70" />
+                <span className="absolute right-[21%] top-[45%] h-[11%] w-[4%] rounded-full bg-black/70" />
+              </div>
+
+              {/* Screen face stands back up from that front edge, so it ends up a
+              full chassis depth in front of the pivot. */}
+              <div
+                className="absolute bottom-full left-0 w-full origin-bottom"
+                style={{
+                  aspectRatio: `${PHONE_W} / ${PHONE_H}`,
+                  transform: "rotateX(90deg)",
+                  transformStyle: "preserve-3d",
+                }}
+              >
+                {/* Chassis body: the phone's own outline stepped back in Z, so the
                 thickness follows the rounded corners exactly. The Z transform
                 sits on the wrapper and the tint on the image, because a filter
                 would flatten the layer out of its parent's 3D space. */}
-              {Array.from({ length: PHONE_LAYERS }, (_, i) => (
-                <div
-                  key={i}
-                  className="absolute inset-0"
-                  style={{
-                    transform: `translateZ(-${((i + 1) * PHONE_LAYER_STEP).toFixed(3)}cqw)`,
-                  }}
-                  aria-hidden
+                {Array.from({ length: PHONE_LAYERS }, (_, i) => (
+                  <div
+                    key={i}
+                    className="absolute inset-0"
+                    style={{
+                      transform: `translateZ(-${((i + 1) * PHONE_LAYER_STEP).toFixed(3)}cqw)`,
+                    }}
+                    aria-hidden
+                  >
+                    <Image
+                      src={PHONE}
+                      alt=""
+                      width={PHONE_W}
+                      height={PHONE_H}
+                      className="h-full w-full select-none"
+                      style={{
+                        filter: `brightness(${(0.5 - (i / PHONE_LAYERS) * 0.3).toFixed(3)})`,
+                      }}
+                      sizes="(max-width: 768px) 22vw, 150px"
+                    />
+                  </div>
+                ))}
+
+                <motion.div
+                  className="relative h-full w-full"
+                  initial={false}
+                  animate={{ filter: up ? "brightness(1)" : "brightness(0.5)" }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
                 >
+                  {/* No drop-shadow here: it renders inside the tipped plane and
+                  smears with it. Ground contact shadow lives outside instead. */}
                   <Image
                     src={PHONE}
                     alt=""
                     width={PHONE_W}
                     height={PHONE_H}
-                    className="h-full w-full select-none"
-                    style={{
-                      filter: `brightness(${(0.5 - (i / PHONE_LAYERS) * 0.3).toFixed(3)})`,
-                    }}
+                    className="absolute inset-0 z-[1] h-full w-full select-none"
                     sizes="(max-width: 768px) 22vw, 150px"
+                    priority
+                    aria-hidden
                   />
-                </div>
-              ))}
 
-              <motion.div
-                className="relative h-full w-full"
-                initial={false}
-                animate={{ filter: up ? "brightness(1)" : "brightness(0.5)" }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-              >
-                {/* No drop-shadow here: it renders inside the tipped plane and
-                  smears with it. Ground contact shadow lives outside instead. */}
-                <Image
-                  src={PHONE}
-                  alt=""
-                  width={PHONE_W}
-                  height={PHONE_H}
-                  className="absolute inset-0 z-[1] h-full w-full select-none"
-                  sizes="(max-width: 768px) 22vw, 150px"
-                  priority
-                  aria-hidden
-                />
-
-                <div
-                  data-product-screen="mobile"
-                  className="absolute z-[2] overflow-hidden bg-black"
-                  style={{
-                    top: PHONE_SCREEN.top,
-                    left: PHONE_SCREEN.left,
-                    width: PHONE_SCREEN.width,
-                    height: PHONE_SCREEN.height,
-                    borderRadius: PHONE_SCREEN.radius,
-                  }}
-                >
-                  {contentSrc ? (
-                    <motion.div
-                      className="absolute inset-0"
-                      initial={false}
-                      animate={{ opacity: up && !hideScreen ? 1 : 0 }}
-                      transition={{
-                        duration: hideScreen ? 0.12 : 0,
-                        ease: "easeOut",
-                      }}
-                    >
-                      <Image
-                        src={contentSrc}
-                        alt={contentAlt}
-                        fill
-                        className="object-cover object-top"
-                        sizes="(max-width: 768px) 22vw, 150px"
-                        priority
-                      />
-                    </motion.div>
-                  ) : null}
-                </div>
-              </motion.div>
+                  <div
+                    data-product-screen="mobile"
+                    className="absolute z-[2] overflow-hidden bg-black"
+                    style={{
+                      top: PHONE_SCREEN.top,
+                      left: PHONE_SCREEN.left,
+                      width: PHONE_SCREEN.width,
+                      height: PHONE_SCREEN.height,
+                      borderRadius: PHONE_SCREEN.radius,
+                    }}
+                  >
+                    {contentSrc ? (
+                      <motion.div
+                        className="absolute inset-0"
+                        initial={false}
+                        animate={{ opacity: up && !hideScreen ? 1 : 0 }}
+                        transition={{
+                          duration: hideScreen ? 0.12 : 0,
+                          ease: "easeOut",
+                        }}
+                      >
+                        <Image
+                          src={contentSrc}
+                          alt={contentAlt}
+                          fill
+                          className="object-cover object-top"
+                          sizes="(max-width: 768px) 22vw, 150px"
+                          priority
+                        />
+                      </motion.div>
+                    ) : null}
+                  </div>
+                </motion.div>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
