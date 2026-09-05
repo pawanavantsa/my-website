@@ -34,8 +34,8 @@ type ProductScreenGalleryProps = {
 
 /**
  * Expanded screens. Height-capped to keep the open view unscrollable.
- * Mobile uses object-contain — our phone assets are ~9:16 while the device
- * hole is taller, and cover was chopping ReachAI / Voice (nav + headers).
+ * Mobile frames carry the 860:1854 ratio of the iphone-flat content hole, so
+ * the same asset fills the device and the expanded tile with no letterboxing.
  */
 export function ProductScreenGallery({
   product,
@@ -65,8 +65,8 @@ export function ProductScreenGallery({
           src={mobile.src}
           alt={mobile.alt}
           radius={24}
-          className="aspect-[9/16] h-[min(28dvh,21rem)] w-auto sm:h-[min(38dvh,21rem)]"
-          fit="contain"
+          className="aspect-[860/1854] h-[min(28dvh,21rem)] w-auto sm:h-[min(38dvh,21rem)]"
+          fit="cover"
         />
       </div>
     );
@@ -80,8 +80,8 @@ export function ProductScreenGallery({
           src={mobile.src}
           alt={mobile.alt}
           radius={26}
-          className="aspect-[9/16] h-[min(36dvh,28rem)] w-auto sm:h-[min(50dvh,28rem)]"
-          fit="contain"
+          className="aspect-[860/1854] h-[min(36dvh,28rem)] w-auto sm:h-[min(50dvh,28rem)]"
+          fit="cover"
         />
       </div>
     );
@@ -181,7 +181,7 @@ export function ScreenFlightAnchors({
           alt={mobile.alt}
           rect={origins.mobile}
           radius={Math.max(8, origins.mobile.width * 0.09)}
-          fit="contain"
+          fit="cover"
         />
       ) : null}
     </>

@@ -1,7 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+  type MotionValue,
+} from "framer-motion";
+import { useEffect } from "react";
 import type { Product, ProductSlide } from "@/lib/products";
 import { productHasMobile, productHasWeb } from "@/lib/products";
 
@@ -25,6 +33,8 @@ const DECK_TILT = 72;
 /** Lid rest angles. -106deg is coplanar with the deck (72 - 180) plus 2deg of float. */
 const LID_OPEN = 3.5;
 const LID_CLOSED = -106;
+/** Angle where the lid is edge-on to the camera — the frame to swap faces. */
+const LID_EDGE_ON = -90;
 
 /**
  * Wrapper is 100:84. The lid panel is 60.6% of the wrapper width tall (a 1.65
@@ -110,19 +120,19 @@ export function ProductDeviceStage({
           the devices, which carry no z-index of their own. */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <div
-          className="absolute left-[6%] top-[14%] h-[76%] w-[78%] blur-2xl"
+          className="absolute left-[2%] top-[6%] h-[88%] w-[90%] blur-3xl"
           style={{
             borderRadius: "50%",
             background:
-              "radial-gradient(ellipse at 50% 55%, rgba(78,150,240,0.17) 0%, rgba(38,92,190,0.09) 40%, rgba(20,50,120,0.03) 62%, transparent 76%)",
+              "radial-gradient(ellipse at 50% 55%, rgba(78,150,240,0.42) 0%, rgba(38,92,190,0.24) 36%, rgba(20,50,120,0.1) 58%, transparent 80%)",
           }}
         />
         <div
-          className="absolute bottom-[4%] left-[12%] h-[16%] w-[66%] blur-xl"
+          className="absolute bottom-0 left-[8%] h-[28%] w-[78%] blur-2xl"
           style={{
             borderRadius: "50%",
             background:
-              "radial-gradient(ellipse at 50% 50%, rgba(120,190,255,0.13) 0%, transparent 70%)",
+              "radial-gradient(ellipse at 50% 50%, rgba(120,190,255,0.38) 0%, rgba(80,150,230,0.14) 42%, transparent 74%)",
           }}
         />
       </div>
@@ -161,8 +171,8 @@ export function ProductDeviceStage({
 
 /**
  * The lid is a plane hinged at the deck's far edge, so closing is a real
- * rotation onto the keyboard. Past 90deg the front face turns away and CSS
- * hands over to the aluminium back cover, which is why no keys survive the fold.
+ * rotation onto the keyboard. Past 90deg the front face turns away and the
+ * aluminium back cover takes over, which is why no keys survive the fold.
  */
 function Laptop({
   open,
@@ -177,6 +187,28 @@ function Laptop({
   contentAlt: string;
   hideScreen?: boolean;
 }) {
+  // The hinge angle is driven by hand so the faces can be swapped on the exact
+  // frame the lid passes edge-on. backface-visibility alone lets the front leak
+  // through as a mirrored screen while both faces sit coplanar mid-swing.
+  const hinge = useMotionValue(open ? LID_OPEN : LID_CLOSED);
+  const frontFacing = useTransform(hinge, (deg) => deg > LID_EDGE_ON);
+  const facingFront = useTransform(frontFacing, (front) =>
+    front ? "visible" : "hidden",
+  );
+  const facingBack = useTransform(frontFacing, (front) =>
+    front ? "hidden" : "visible",
+  );
+
+  useEffect(() => {
+    const target = open ? LID_OPEN : LID_CLOSED;
+    if (reduced) {
+      hinge.set(target);
+      return;
+    }
+    const controls = animate(hinge, target, { duration: 1.05, ease: EASE });
+    return () => controls.stop();
+  }, [open, reduced, hinge]);
+
   return (
     <div
       className="relative h-full w-full"
@@ -227,26 +259,24 @@ function Laptop({
             height: PANEL_BAND,
             transformStyle: "preserve-3d",
             borderRadius: CHASSIS_RADIUS,
+            rotateX: hinge,
           }}
-          initial={false}
-          animate={
-            reduced ? undefined : { rotateX: open ? LID_OPEN : LID_CLOSED }
-          }
-          transition={{ duration: 1.05, ease: EASE }}
         >
           <LidFront
             open={open}
             contentSrc={contentSrc}
             contentAlt={contentAlt}
             hideScreen={hideScreen}
+            visibility={facingFront}
           />
 
-          <div
+          <motion.div
             className="absolute inset-0 overflow-hidden"
             style={{
               transform: "rotateY(180deg)",
               backfaceVisibility: "hidden",
               borderRadius: CHASSIS_RADIUS,
+              visibility: facingBack,
             }}
             aria-hidden
           >
@@ -259,7 +289,7 @@ function Laptop({
               sizes="(max-width: 768px) 70vw, 620px"
               priority
             />
-          </div>
+          </motion.div>
         </motion.div>
       </motion.div>
     </div>
@@ -271,16 +301,22 @@ function LidFront({
   contentSrc,
   contentAlt,
   hideScreen,
+  visibility,
 }: {
   open: boolean;
   contentSrc?: string;
   contentAlt: string;
   hideScreen?: boolean;
+  visibility: MotionValue<"visible" | "hidden">;
 }) {
   return (
-    <div
+    <motion.div
       className="absolute inset-0 overflow-hidden"
-      style={{ backfaceVisibility: "hidden", borderRadius: CHASSIS_RADIUS }}
+      style={{
+        backfaceVisibility: "hidden",
+        borderRadius: CHASSIS_RADIUS,
+        visibility,
+      }}
     >
       {/* Bezel texture under the screen art — its screen hole is opaque black,
           so content must paint above it or the UI never shows. */}
@@ -329,7 +365,7 @@ function LidFront({
           aria-hidden
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -509,7 +545,7 @@ function Phone({
                         src={contentSrc}
                         alt={contentAlt}
                         fill
-                        className="object-contain object-top"
+                        className="object-cover object-top"
                         sizes="(max-width: 768px) 22vw, 150px"
                         priority
                       />
