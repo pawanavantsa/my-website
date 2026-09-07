@@ -24,7 +24,13 @@ const LID_FRONT = "/products/devices/mbp-lid-front.png";
 const LID_BACK = "/products/devices/mbp-lid-back.png";
 const DECK = "/products/devices/mbp-deck-top.png";
 const PHONE = "/products/devices/iphone-flat.png";
-const ROCK = "/products/devices/rock-platform.png";
+
+/**
+ * Cool environmental grade for chassis metal only — never applied to screen UI.
+ * Pulls devices toward the dark-blue scene without looking tinted/neon.
+ */
+const CHASSIS_GRADE =
+  "brightness(0.94) saturate(0.84) hue-rotate(10deg) contrast(1.03)";
 
 /** Shared chassis corner radius — matches processed texture rounding. */
 const CHASSIS_RADIUS = "2.4%";
@@ -151,15 +157,30 @@ export function ProductDeviceStage({
         />
       </div>
 
-      <DeskSurface />
+      <ProductPedestal />
+
+      {/* Extremely soft atmospheric haze behind the devices — never over screens. */}
+      <div
+        className="pointer-events-none absolute inset-[6%] bottom-[4%] z-0 rounded-[45%]"
+        style={{
+          background:
+            "radial-gradient(ellipse at 48% 55%, rgba(55,115,190,0.14) 0%, rgba(30,70,130,0.05) 45%, transparent 72%)",
+          filter: "blur(28px)",
+        }}
+        aria-hidden
+      />
 
       {/* Devices stand on the ledge. Each keeps its OWN camera so the internal
           hinge and extrusion geometry stay exact — the yaw is applied inside
           that camera (see Laptop/Phone). */}
-      <div className="absolute inset-0 flex items-end justify-center px-[1%] pb-[12%]">
+      <div className="absolute inset-0 z-[2] flex items-end justify-center px-[1%] pb-[10%]">
         <div className="relative h-full w-full max-w-[48rem]">
+          {/* Shadows live here — flat on the pedestal — not inside the yawed
+              3D assemblies, so they stay planted on the top surface. */}
+          <DeviceGroundShadows />
+
           <div
-            className="absolute bottom-[2%] left-[1%] h-[94%] aspect-[100/84]"
+            className="absolute bottom-[1%] left-[1%] z-[2] h-[94%] aspect-[100/84]"
             style={{ containerType: "inline-size" }}
           >
             <Laptop
@@ -192,33 +213,221 @@ export function ProductDeviceStage({
 }
 
 /**
- * Photoreal basalt plinth the machines stand on. A rendered plate rather than
- * CSS gradients — chiselled rock facets and a wet-stone top are exactly what
- * gradients can't fake, and it fades into pure black so it needs no masking.
+ * Premium architectural pedestal — CSS/SVG layers only. Bottom-left, ~40vw,
+ * cropped by the viewport edges. Not a rock, floor, or full-bleed terrain.
  */
-function DeskSurface() {
+function ProductPedestal() {
+  const reduced = useReducedMotion();
+
   return (
-    <div
-      className="pointer-events-none absolute inset-x-[-6%] bottom-[-6%] z-0 h-[38%]"
+    <motion.div
+      className="pointer-events-none absolute z-0 w-[min(40vw,100%)] max-md:w-[min(78%,100%)]"
+      style={{
+        left: "-4%",
+        bottom: "-3%",
+        height: "3.6rem",
+      }}
+      initial={false}
+      animate={reduced ? undefined : { y: [0, -2.5, 0] }}
+      transition={
+        reduced
+          ? undefined
+          : { duration: 7.5, repeat: Infinity, ease: "easeInOut" }
+      }
       aria-hidden
     >
-      <Image
-        src={ROCK}
-        alt=""
-        width={1536}
-        height={543}
-        className="h-full w-full select-none object-cover object-top"
-        sizes="(max-width: 768px) 100vw, 700px"
-        priority
-      />
-
-      {/* Cool skim from the galaxy side, keeping the stone in the same light
-          as the devices. */}
+      {/* Soft ambient glow under the object — cool, not neon. */}
       <div
-        className="absolute inset-0 mix-blend-screen"
+        className="absolute -inset-x-[12%] -bottom-[55%] h-[120%] rounded-[50%]"
         style={{
           background:
-            "radial-gradient(ellipse at 68% 18%, rgba(120,170,235,0.14) 0%, transparent 58%)",
+            "radial-gradient(ellipse at 50% 40%, rgba(70,140,220,0.16) 0%, rgba(40,90,160,0.06) 42%, transparent 72%)",
+          filter: "blur(14px)",
+        }}
+      />
+
+      {/* Lower shadow into the void. */}
+      <div
+        className="absolute inset-x-[8%] top-[48%] h-[90%] rounded-[50%] bg-black/55"
+        style={{ filter: "blur(18px)" }}
+      />
+
+      {/* Front fascia — slightly darker than the deck. */}
+      <div
+        className="absolute inset-x-[1.5%] bottom-0 h-[42%]"
+        style={{
+          borderRadius: "0 0 46% 52% / 0 0 85% 95%",
+          background:
+            "linear-gradient(180deg, #141820 0%, #0a0c10 52%, #050608 100%)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+        }}
+      />
+
+      {/* Thin cool-blue accent along the lower front edge + soft under-glow. */}
+      <motion.div
+        className="absolute inset-x-[4%] bottom-[36%] h-[2px]"
+        style={{
+          borderRadius: "999px",
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(110,175,255,0.08) 12%, rgba(120,185,255,0.22) 48%, rgba(110,175,255,0.08) 88%, transparent 100%)",
+          boxShadow:
+            "0 0 12px 3px rgba(90,165,255,0.14), 0 4px 16px rgba(70,140,220,0.1)",
+        }}
+        initial={false}
+        animate={reduced ? undefined : { opacity: [0.55, 0.88, 0.55] }}
+        transition={
+          reduced
+            ? undefined
+            : { duration: 5.8, repeat: Infinity, ease: "easeInOut" }
+        }
+      />
+
+      {/* Top deck — shallow perspective, satin graphite. */}
+      <div
+        className="absolute inset-x-0 top-0 h-[70%] origin-bottom"
+        style={{
+          borderRadius: "46% 34% 38% 50% / 72% 58% 62% 78%",
+          transform: "perspective(520px) rotateX(62deg)",
+          background:
+            "linear-gradient(152deg, #1c222c 0%, #10141a 38%, #0b0d12 68%, #121820 100%)",
+          boxShadow:
+            "inset 0 1px 0 rgba(170,205,255,0.09), inset 0 -10px 18px rgba(0,0,0,0.35)",
+        }}
+      >
+        {/* Extremely subtle satin skim — not a mirror. */}
+        <div
+          className="absolute inset-0"
+          style={{
+            borderRadius: "inherit",
+            background:
+              "linear-gradient(112deg, transparent 28%, rgba(150,190,235,0.055) 46%, transparent 64%)",
+          }}
+        />
+      </div>
+
+      {/* Organic silhouette guide (invisible stroke) — keeps the mass from reading as a hard box. */}
+      <svg
+        className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.12]"
+        viewBox="0 0 400 72"
+        preserveAspectRatio="none"
+        aria-hidden
+      >
+        <path
+          d="M18 28 C70 10 140 6 210 8 C290 11 350 18 382 30 C370 48 300 58 210 60 C120 62 50 54 18 40 Z"
+          fill="none"
+          stroke="rgba(140,185,240,0.35)"
+          strokeWidth="0.6"
+        />
+      </svg>
+    </motion.div>
+  );
+}
+
+/** Soft contact pools + large soft cast so devices don't float. */
+function DeviceGroundShadows() {
+  return (
+    <div className="device-shadow pointer-events-none absolute inset-0 z-[1]" aria-hidden>
+      {/* Large soft cast behind/below the pair */}
+      <div
+        className="absolute bottom-[2%] left-[4%] h-[22%] w-[78%] rounded-[50%] bg-black/45 blur-3xl"
+        style={{ transform: "rotate(-3deg)" }}
+      />
+      {/* AO where laptop meets pedestal */}
+      <div
+        className="device-contact absolute bottom-[8%] left-[8%] h-[10%] w-[58%] rounded-[50%] bg-black/40 blur-2xl"
+        style={{ transform: "rotate(-3deg)" }}
+      />
+      <div
+        className="device-contact absolute bottom-[10%] left-[14%] h-[4.5%] w-[46%] rounded-[50%] bg-black/60 blur-md"
+        style={{ transform: "rotate(-2deg)" }}
+      />
+      {/* AO where phone meets pedestal */}
+      <div
+        className="device-contact absolute bottom-[8%] right-[6%] h-[9%] w-[16%] rounded-[50%] bg-black/35 blur-xl"
+        style={{ transform: "rotate(5deg)" }}
+      />
+      <div
+        className="device-contact absolute bottom-[10%] right-[8%] h-[3.5%] w-[11%] rounded-[50%] bg-black/60 blur-sm"
+        style={{ transform: "rotate(4deg)" }}
+      />
+      {/* Occlusion where phone sits near the laptop */}
+      <div
+        className="device-contact absolute bottom-[14%] right-[16%] h-[8%] w-[10%] rounded-[50%] bg-black/30 blur-lg"
+        style={{ transform: "rotate(8deg)" }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Environmental light shells around a device silhouette. Edge-biased so screen
+ * UI stays readable — no full-face blue wash, no neon outline.
+ */
+function DeviceEnvLight({ kind }: { kind: "laptop" | "phone" }) {
+  const tall = kind === "phone";
+  return (
+    <div
+      className="pointer-events-none absolute inset-0 z-[4] overflow-hidden"
+      style={{ borderRadius: tall ? "12%" : CHASSIS_RADIUS }}
+      aria-hidden
+    >
+      {/* Cool ambient from the galaxy / network — softens dark metal. */}
+      <div
+        className="device-ambient absolute inset-0 mix-blend-soft-light"
+        style={{
+          background: tall
+            ? "radial-gradient(ellipse at 78% 28%, rgba(110,170,235,0.22) 0%, transparent 55%), radial-gradient(ellipse at 18% 70%, rgba(70,120,190,0.1) 0%, transparent 50%)"
+            : "radial-gradient(ellipse at 72% 22%, rgba(120,175,240,0.2) 0%, transparent 52%), radial-gradient(ellipse at 20% 78%, rgba(60,110,180,0.1) 0%, transparent 48%)",
+          opacity: 0.55,
+        }}
+      />
+
+      {/* Soft top key — cool white/blue, stronger on upper edges. */}
+      <div
+        className="device-ambient absolute inset-x-0 top-0 h-[38%]"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(210,225,245,0.11) 0%, rgba(140,180,230,0.04) 42%, transparent 100%)",
+          mixBlendMode: "soft-light",
+        }}
+      />
+
+      {/* Thin blue rim — strongest toward the background light (right/upper). */}
+      <div
+        className="device-rim absolute inset-y-[3%] right-0 w-[2.2%]"
+        style={{
+          background:
+            "linear-gradient(270deg, rgba(130,185,255,0.28) 0%, rgba(100,160,230,0.08) 45%, transparent 100%)",
+          mixBlendMode: "screen",
+          filter: "blur(0.4px)",
+        }}
+      />
+      <div
+        className="device-rim absolute inset-y-[8%] left-0 w-[1.6%]"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(100,155,220,0.14) 0%, transparent 100%)",
+          mixBlendMode: "screen",
+          filter: "blur(0.5px)",
+        }}
+      />
+      <div
+        className="device-rim absolute inset-x-[4%] top-0 h-[2.4%]"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(160,200,255,0.22) 0%, transparent 100%)",
+          mixBlendMode: "screen",
+          filter: "blur(0.35px)",
+        }}
+      />
+
+      {/* Platform bounce — faint blue lift on the lower body. */}
+      <div
+        className="device-bounce absolute inset-x-[6%] bottom-0 h-[18%]"
+        style={{
+          background:
+            "linear-gradient(0deg, rgba(90,150,220,0.14) 0%, rgba(70,130,200,0.04) 45%, transparent 100%)",
+          mixBlendMode: "screen",
         }}
       />
     </div>
@@ -281,12 +490,13 @@ function Laptop({
           transformStyle: "preserve-3d",
         }}
       >
-        {/* Contact shadow, tightening as the machine closes. */}
+        {/* Soft under-deck occlusion — the main cast sits on the rock via
+            DeviceGroundShadows so this stays light. */}
         <motion.div
-          className="absolute left-[6%] w-[88%] rounded-[50%] bg-black blur-xl"
-          style={{ top: "88%", height: "9%" }}
+          className="absolute left-[8%] w-[84%] rounded-[50%] bg-black blur-lg"
+          style={{ top: "90%", height: "6%" }}
           initial={false}
-          animate={{ opacity: open ? 0.55 : 0.7 }}
+          animate={{ opacity: open ? 0.28 : 0.4 }}
           transition={{ duration: 0.95, ease: EASE }}
           aria-hidden
         />
@@ -320,7 +530,7 @@ function Laptop({
                 height={853}
                 className="h-full w-full select-none object-fill"
                 style={{
-                  filter: `brightness(${(0.46 - (i / DECK_LAYERS) * 0.3).toFixed(3)})`,
+                  filter: `${CHASSIS_GRADE} brightness(${(0.46 - (i / DECK_LAYERS) * 0.3).toFixed(3)})`,
                 }}
                 sizes="(max-width: 768px) 70vw, 620px"
               />
@@ -337,8 +547,28 @@ function Laptop({
               width={1273}
               height={853}
               className="h-full w-full select-none object-fill"
+              style={{ filter: CHASSIS_GRADE }}
               sizes="(max-width: 768px) 70vw, 620px"
               priority
+              aria-hidden
+            />
+            {/* Soft top skim + platform bounce on the keyboard deck only. */}
+            <div
+              className="device-ambient pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(180,210,245,0.1) 0%, transparent 35%), linear-gradient(0deg, rgba(80,140,210,0.12) 0%, transparent 28%)",
+                mixBlendMode: "soft-light",
+              }}
+              aria-hidden
+            />
+            <div
+              className="device-rim pointer-events-none absolute inset-y-[8%] right-0 w-[2%]"
+              style={{
+                background:
+                  "linear-gradient(270deg, rgba(120,175,245,0.2) 0%, transparent 100%)",
+                mixBlendMode: "screen",
+              }}
               aria-hidden
             />
           </div>
@@ -370,7 +600,9 @@ function Laptop({
                 width={1536}
                 height={1024}
                 className="h-full w-full select-none object-fill"
-                style={{ filter: `brightness(${(0.4 - i * 0.08).toFixed(2)})` }}
+                style={{
+                  filter: `${CHASSIS_GRADE} brightness(${(0.4 - i * 0.08).toFixed(2)})`,
+                }}
                 sizes="(max-width: 768px) 70vw, 620px"
               />
             </div>
@@ -400,6 +632,7 @@ function Laptop({
               width={1536}
               height={1024}
               className="h-full w-full select-none object-fill drop-shadow-[0_10px_22px_rgba(0,0,0,0.75)]"
+              style={{ filter: CHASSIS_GRADE }}
               sizes="(max-width: 768px) 70vw, 620px"
               priority
             />
@@ -440,14 +673,18 @@ function LidFront({
         width={1536}
         height={1024}
         className="absolute inset-0 z-[1] h-full w-full select-none object-fill"
+        style={{ filter: CHASSIS_GRADE }}
         sizes="(max-width: 768px) 70vw, 620px"
         priority
         aria-hidden
       />
 
+      {/* Env light under the screen plane so product UI stays ungraded. */}
+      <DeviceEnvLight kind="laptop" />
+
       <div
         data-product-screen="web"
-        className="absolute z-[2] overflow-hidden bg-black"
+        className="absolute z-[6] overflow-hidden bg-black"
         style={{
           top: LID_SCREEN.top,
           left: LID_SCREEN.left,
@@ -509,8 +746,8 @@ function Phone({
       className="absolute bottom-0 right-[4%] z-[3] w-[18%]"
       style={{ containerType: "inline-size" }}
     >
-      {/* Ground contact shadow — stays flat instead of tipping with the body,
-          and spreads as the phone lies down. */}
+      {/* Spreads when the phone tips flat — upright contact is mostly the
+          rock pools above, so this stays quieter while standing. */}
       <motion.div
         className="absolute bottom-0 left-[2%] z-0 w-[96%] rounded-[50%] bg-black blur-md"
         style={{ height: "5%" }}
@@ -519,8 +756,8 @@ function Phone({
           reduced
             ? undefined
             : up
-              ? { opacity: 0.5, scaleX: 0.8, y: "40%" }
-              : { opacity: 0.65, scaleX: 1.15, y: "120%" }
+              ? { opacity: 0.28, scaleX: 0.75, y: "35%" }
+              : { opacity: 0.7, scaleX: 1.2, y: "110%" }
         }
         transition={{ duration: 0.95, ease: EASE }}
         aria-hidden
@@ -620,7 +857,7 @@ function Phone({
                       height={PHONE_H}
                       className="h-full w-full select-none"
                       style={{
-                        filter: `brightness(${(0.5 - (i / PHONE_LAYERS) * 0.3).toFixed(3)})`,
+                        filter: `${CHASSIS_GRADE} brightness(${(0.5 - (i / PHONE_LAYERS) * 0.3).toFixed(3)})`,
                       }}
                       sizes="(max-width: 768px) 22vw, 150px"
                     />
@@ -641,14 +878,18 @@ function Phone({
                     width={PHONE_W}
                     height={PHONE_H}
                     className="absolute inset-0 z-[1] h-full w-full select-none"
+                    style={{ filter: CHASSIS_GRADE }}
                     sizes="(max-width: 768px) 22vw, 150px"
                     priority
                     aria-hidden
                   />
 
+                  {/* Env light under the screen plane so product UI stays ungraded. */}
+                  <DeviceEnvLight kind="phone" />
+
                   <div
                     data-product-screen="mobile"
-                    className="absolute z-[2] overflow-hidden bg-black"
+                    className="absolute z-[6] overflow-hidden bg-black"
                     style={{
                       top: PHONE_SCREEN.top,
                       left: PHONE_SCREEN.left,
